@@ -2,28 +2,34 @@ import { db } from './db.js'
 import { calcularMovimientoDeDinero, redondear } from './money.js'
 
 /**
- * Registra una deuda (siempre denominada en USD).
+ * Registra una deuda (denominada en USD, con soporte para registrar en USD o VES).
  * Ver specs/debts/spec.md - Requirement: Registrar una deuda.
  *
  * @param {{ persona: string, direccion: 'debo'|'me_deben', monto: number,
- *           fecha: string, notas?: string }} datos
+ *           moneda?: 'USD'|'VES', tasaBCV?: number, fecha: string, notas?: string }} datos
  */
-export async function registrarDeuda({ persona, direccion, monto, fecha, notas }) {
+export async function registrarDeuda({ persona, direccion, monto, moneda = 'USD', tasaBCV, fecha, notas }) {
   if (direccion !== 'debo' && direccion !== 'me_deben') {
     throw new Error("La dirección debe ser 'debo' o 'me_deben'")
   }
   if (!persona) {
     throw new Error('La persona es requerida')
   }
-  if (!monto || monto <= 0) {
+  if (!monto || Number(monto) <= 0) {
     throw new Error('El monto original debe ser mayor a 0')
   }
+
+  const movimiento = calcularMovimientoDeDinero({ monto: Number(monto), moneda, tasaBCV })
+  const montoUSD = movimiento.montoUSD
 
   const id = await db.deudas.add({
     persona,
     direccion,
-    montoOriginal: monto,
-    saldoPendiente: monto,
+    montoOriginal: montoUSD,
+    saldoPendiente: montoUSD,
+    montoOriginalRegistrado: Number(monto),
+    monedaOriginal: moneda,
+    tasaBCV: moneda === 'VES' ? Number(tasaBCV) : null,
     fecha,
     estado: 'pendiente',
     notas: notas ?? '',
@@ -41,7 +47,7 @@ export async function registrarDeuda({ persona, direccion, monto, fecha, notas }
  *
  * @param {{ deudaId: number, monto: number, moneda: 'USD'|'VES', tasaBCV?: number, fecha: string }} datos
  */
-export async function registrarAbono({ deudaId, monto, moneda, tasaBCV, fecha }) {
+export async function registrarAbono({ deudaId, monto, moneda, tasaBCV, fecha, nota }) {
   const deuda = await db.deudas.get(deudaId)
   if (!deuda) {
     throw new Error('Deuda no encontrada')
@@ -59,6 +65,7 @@ export async function registrarAbono({ deudaId, monto, moneda, tasaBCV, fecha })
     deudaId,
     ...movimiento,
     fecha,
+    nota: nota?.trim() || '',
   })
 
   const saldoPendiente = redondear(deuda.saldoPendiente - movimiento.montoUSD)

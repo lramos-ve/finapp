@@ -8,13 +8,13 @@ export default defineConfig({
     svelte(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'icon.svg'],
+      includeAssets: ['favicon.svg', 'icon.svg', 'logo.png'],
       manifest: {
-        name: 'Finanzas',
-        short_name: 'Finanzas',
-        description: 'Registro personal de ingresos, gastos, deudas y gastos fijos',
-        theme_color: '#1e293b',
-        background_color: '#1e293b',
+        name: 'Saca La Cuenta',
+        short_name: 'SacaLaCuenta',
+        description: 'Control financiero bi-moneda en Dólares y Bolívares con tasa oficial BCV',
+        theme_color: '#0f172a',
+        background_color: '#0f172a',
         display: 'standalone',
         start_url: '/',
         icons: [
@@ -41,4 +41,8 @@ export default defineConfig({
       },
     }),
   ],
+  server: {
+    host: true,
+    port: 5173,
+  },
 })

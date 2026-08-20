@@ -35,6 +35,48 @@ export async function desactivarGastoFijo(gastoFijoId) {
 }
 
 /**
+ * Activa o reactiva un gasto fijo.
+ */
+export async function activarGastoFijo(gastoFijoId) {
+  await db.gastosFijos.update(gastoFijoId, { activo: 1 })
+}
+
+/**
+ * Edita los datos de una plantilla de gasto fijo existente.
+ */
+export async function editarGastoFijo({ id, nombre, monto, diaVencimiento }) {
+  if (!id) throw new Error('El ID es requerido')
+  if (!nombre?.trim()) throw new Error('El nombre es requerido')
+  if (!monto || Number(monto) <= 0) throw new Error('El monto debe ser mayor a 0')
+  if (!diaVencimiento || Number(diaVencimiento) < 1 || Number(diaVencimiento) > 31) {
+    throw new Error('El día de vencimiento debe estar entre 1 y 31')
+  }
+
+  await db.gastosFijos.update(id, {
+    nombre: nombre.trim(),
+    monto: Number(monto),
+    diaVencimiento: Number(diaVencimiento),
+  })
+
+  return db.gastosFijos.get(id)
+}
+
+/**
+ * Elimina un gasto fijo y limpia sus instancias y pagos asociados.
+ */
+export async function eliminarGastoFijo(gastoFijoId) {
+  if (!gastoFijoId) throw new Error('ID requerido')
+  await db.transaction('rw', db.gastosFijos, db.instanciasGastoFijo, db.pagosGastoFijo, async () => {
+    const instancias = await db.instanciasGastoFijo.where('gastoFijoId').equals(gastoFijoId).toArray()
+    for (const inst of instancias) {
+      await db.pagosGastoFijo.where('instanciaId').equals(inst.id).delete()
+    }
+    await db.instanciasGastoFijo.where('gastoFijoId').equals(gastoFijoId).delete()
+    await db.gastosFijos.delete(gastoFijoId)
+  })
+}
+
+/**
  * Para cada gasto fijo activo, genera la instancia del período actual y la
  * del siguiente si no existen, arrastrando el saldo pendiente del período
  * anterior cuando quedó vencido.

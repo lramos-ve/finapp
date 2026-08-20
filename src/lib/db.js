@@ -38,3 +38,7 @@ db.version(1).stores({
   instanciasGastoFijo: '++id, gastoFijoId, periodo, estado, [gastoFijoId+periodo]',
   pagosGastoFijo: '++id, instanciaId, fecha',
 })
+
+db.version(2).stores({
+  ahorros: '++id, tipoAhorro, pausado, createdAt'
+})

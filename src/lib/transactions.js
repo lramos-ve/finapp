@@ -8,7 +8,7 @@ import { calcularMovimientoDeDinero, redondear } from './money.js'
  * @param {{ tipo: 'ingreso'|'gasto', monto: number, moneda: 'USD'|'VES',
  *           tasaBCV?: number, fecha: string, descripcion?: string }} datos
  */
-export async function registrarTransaccion({ tipo, monto, moneda, tasaBCV, fecha, descripcion }) {
+export async function registrarTransaccion({ tipo, monto, moneda, tasaBCV, fecha, descripcion, categoria }) {
   if (tipo !== 'ingreso' && tipo !== 'gasto') {
     throw new Error("El tipo debe ser 'ingreso' o 'gasto'")
   }
@@ -23,6 +23,7 @@ export async function registrarTransaccion({ tipo, monto, moneda, tasaBCV, fecha
     ...movimiento,
     fecha,
     descripcion: descripcion ?? '',
+    categoria: categoria ?? '',
   })
 
   return db.transacciones.get(id)
