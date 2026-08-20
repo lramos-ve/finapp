@@ -96,10 +96,14 @@
       </label>
       <label>
         Dirección
-        <select bind:value={direccion}>
-          <option value="debo">Yo debo</option>
-          <option value="me_deben">Me deben</option>
-        </select>
+        <div class="control-segmentado">
+          <button type="button" class:activo={direccion === 'debo'} class="gasto" onclick={() => (direccion = 'debo')}>
+            Yo debo
+          </button>
+          <button type="button" class:activo={direccion === 'me_deben'} class="ingreso" onclick={() => (direccion = 'me_deben')}>
+            Me deben
+          </button>
+        </div>
       </label>
     </div>
     <div class="fila">
@@ -148,10 +152,14 @@
               </label>
               <label>
                 Moneda
-                <select bind:value={abonoMoneda}>
-                  <option value="USD">USD</option>
-                  <option value="VES">VES</option>
-                </select>
+                <div class="control-segmentado">
+                  <button type="button" class:activo={abonoMoneda === 'USD'} onclick={() => (abonoMoneda = 'USD')}>
+                    USD
+                  </button>
+                  <button type="button" class:activo={abonoMoneda === 'VES'} onclick={() => (abonoMoneda = 'VES')}>
+                    VES
+                  </button>
+                </div>
               </label>
               {#if abonoMoneda === 'VES'}
                 <label>

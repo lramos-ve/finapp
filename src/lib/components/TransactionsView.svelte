@@ -79,17 +79,25 @@
     <div class="fila">
       <label>
         Tipo
-        <select bind:value={tipo}>
-          <option value="gasto">Gasto</option>
-          <option value="ingreso">Ingreso</option>
-        </select>
+        <div class="control-segmentado">
+          <button type="button" class:activo={tipo === 'gasto'} class="gasto" onclick={() => (tipo = 'gasto')}>
+            Gasto
+          </button>
+          <button type="button" class:activo={tipo === 'ingreso'} class="ingreso" onclick={() => (tipo = 'ingreso')}>
+            Ingreso
+          </button>
+        </div>
       </label>
       <label>
         Moneda
-        <select bind:value={moneda}>
-          <option value="USD">USD</option>
-          <option value="VES">VES</option>
-        </select>
+        <div class="control-segmentado">
+          <button type="button" class:activo={moneda === 'USD'} onclick={() => (moneda = 'USD')}>
+            USD
+          </button>
+          <button type="button" class:activo={moneda === 'VES'} onclick={() => (moneda = 'VES')}>
+            VES
+          </button>
+        </div>
       </label>
     </div>
     <div class="fila">
@@ -122,19 +130,31 @@
   <div class="fila filtros">
     <label>
       Tipo
-      <select bind:value={filtroTipo}>
-        <option value="">Todos</option>
-        <option value="gasto">Gasto</option>
-        <option value="ingreso">Ingreso</option>
-      </select>
+      <div class="control-segmentado">
+        <button type="button" class:activo={filtroTipo === ''} onclick={() => (filtroTipo = '')}>
+          Todos
+        </button>
+        <button type="button" class:activo={filtroTipo === 'gasto'} class="gasto" onclick={() => (filtroTipo = 'gasto')}>
+          Gasto
+        </button>
+        <button type="button" class:activo={filtroTipo === 'ingreso'} class="ingreso" onclick={() => (filtroTipo = 'ingreso')}>
+          Ingreso
+        </button>
+      </div>
     </label>
     <label>
       Moneda
-      <select bind:value={filtroMoneda}>
-        <option value="">Todas</option>
-        <option value="USD">USD</option>
-        <option value="VES">VES</option>
-      </select>
+      <div class="control-segmentado">
+        <button type="button" class:activo={filtroMoneda === ''} onclick={() => (filtroMoneda = '')}>
+          Todas
+        </button>
+        <button type="button" class:activo={filtroMoneda === 'USD'} onclick={() => (filtroMoneda = 'USD')}>
+          USD
+        </button>
+        <button type="button" class:activo={filtroMoneda === 'VES'} onclick={() => (filtroMoneda = 'VES')}>
+          VES
+        </button>
+      </div>
     </label>
   </div>
   {#if transacciones.length === 0}

@@ -196,6 +196,44 @@ select {
   font-size: 1rem;
 }
 
+/* Controles segmentados (Segmented Controls) */
+.control-segmentado {
+  display: flex;
+  background: var(--bg);
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  padding: 2px;
+  gap: 2px;
+}
+
+.control-segmentado button {
+  flex: 1;
+  background: transparent;
+  color: var(--texto-tenue);
+  border: none;
+  border-radius: 6px;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  min-height: 38px;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.control-segmentado button.activo {
+  background: var(--panel);
+  color: var(--texto);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.control-segmentado button.activo.gasto {
+  color: var(--rojo);
+}
+
+.control-segmentado button.activo.ingreso {
+  color: var(--verde);
+}
+
 button {
   align-self: flex-start;
   min-height: 44px;

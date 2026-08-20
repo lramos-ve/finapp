@@ -168,10 +168,14 @@
                 </label>
                 <label>
                   Moneda
-                  <select bind:value={pagoMoneda}>
-                    <option value="USD">USD</option>
-                    <option value="VES">VES</option>
-                  </select>
+                  <div class="control-segmentado">
+                    <button type="button" class:activo={pagoMoneda === 'USD'} onclick={() => (pagoMoneda = 'USD')}>
+                      USD
+                    </button>
+                    <button type="button" class:activo={pagoMoneda === 'VES'} onclick={() => (pagoMoneda = 'VES')}>
+                      VES
+                    </button>
+                  </div>
                 </label>
                 {#if pagoMoneda === 'VES'}
                   <label>
