@@ -1,0 +1,317 @@
+:root {
+  --bg: #0f172a;
+  --panel: #1e293b;
+  --borde: #334155;
+  --texto: #e2e8f0;
+  --texto-tenue: #94a3b8;
+  --verde: #22c55e;
+  --rojo: #ef4444;
+  --acento: #38bdf8;
+  --nav-height: 4rem;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--texto);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+header {
+  padding: 1rem;
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  z-index: 2;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+/* Mobile-first: barra de navegación fija abajo, alcanzable con el pulgar. */
+nav {
+  display: flex;
+  gap: 0.5rem;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  background: var(--panel);
+  border-top: 1px solid var(--borde);
+  padding: 0.5rem 0.5rem calc(0.5rem + env(safe-area-inset-bottom));
+}
+
+nav button {
+  flex: 1;
+  background: var(--panel);
+  color: var(--texto-tenue);
+  border: 1px solid var(--borde);
+  border-radius: 999px;
+  padding: 0.4rem 0.9rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+nav button.activo {
+  color: var(--bg);
+  background: var(--acento);
+  border-color: var(--acento);
+}
+
+main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 1rem;
+  padding-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom));
+}
+
+@media (min-width: 480px) {
+  header {
+    border-bottom: 1px solid var(--borde);
+  }
+
+  nav {
+    position: static;
+    background: transparent;
+    border-top: none;
+    padding: 0 1rem 1rem;
+  }
+
+  nav button {
+    flex: none;
+  }
+
+  main {
+    padding-bottom: 1rem;
+  }
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.panel h2 {
+  margin-top: 0;
+  font-size: 1rem;
+  color: var(--texto-tenue);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.balance-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem;
+}
+
+.card {
+  background: var(--bg);
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.card .label {
+  color: var(--texto-tenue);
+  font-size: 0.8rem;
+}
+
+.card .valor {
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.card.ingreso .valor {
+  color: var(--verde);
+}
+
+.card.gasto .valor {
+  color: var(--rojo);
+}
+
+.card.neto.negativo .valor {
+  color: var(--rojo);
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Mobile-first: los grupos de campos se apilan en una sola columna. */
+.fila {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.fila.filtros {
+  margin-bottom: 0.75rem;
+}
+
+@media (min-width: 480px) {
+  .fila {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+  color: var(--texto-tenue);
+  flex: 1;
+  min-width: 120px;
+}
+
+label.ancho-completo {
+  width: 100%;
+}
+
+input,
+select {
+  background: var(--bg);
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  padding: 0.5rem;
+  color: var(--texto);
+  font-size: 1rem;
+}
+
+button {
+  align-self: flex-start;
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Mobile-first: el botón de envío (y las acciones del formulario) ocupan
+   el ancho completo para que sean fáciles de tocar en una columna. */
+form button {
+  align-self: stretch;
+  width: 100%;
+}
+
+form button[type='submit'],
+form > button:first-of-type {
+  background: var(--acento);
+  color: var(--bg);
+  border: none;
+  border-radius: 8px;
+  padding: 0.55rem 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+@media (min-width: 480px) {
+  form button {
+    align-self: flex-start;
+    width: auto;
+  }
+}
+
+.error {
+  color: var(--rojo);
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.vacio {
+  color: var(--texto-tenue);
+  font-size: 0.9rem;
+}
+
+.lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.lista li {
+  background: var(--bg);
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem;
+}
+
+.lista li.ingreso {
+  border-left: 3px solid var(--verde);
+}
+
+.lista li.gasto {
+  border-left: 3px solid var(--rojo);
+}
+
+.lista li.pagado {
+  opacity: 0.6;
+}
+
+.lista li,
+.deuda-fila {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  font-size: 0.9rem;
+}
+
+.fecha {
+  color: var(--texto-tenue);
+  font-size: 0.8rem;
+  min-width: 5.5rem;
+}
+
+.descripcion {
+  flex: 1;
+}
+
+.monto-original {
+  color: var(--texto-tenue);
+  font-size: 0.8rem;
+}
+
+.monto-usd {
+  font-weight: 600;
+}
+
+.estado {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: var(--texto-tenue);
+}
+
+/* Mobile-first: el formulario de abono/pago dentro de una tarjeta también
+   se apila en una sola columna. */
+.abono-form {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed var(--borde);
+  flex-direction: column;
+}
+
+@media (min-width: 480px) {
+  .abono-form {
+    flex-direction: row;
+    align-items: flex-end;
+  }
+}
