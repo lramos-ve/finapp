@@ -32,6 +32,10 @@
 - **Privacidad Total**: Toda la información se guarda localmente en el dispositivo del usuario utilizando **IndexedDB** a través de **Dexie.js**. Sin backend, sin registros ni rastreadores.
 - **Instalable**: Compatible con instalación directa en pantallas de inicio en iOS, Android, Windows y macOS.
 
+### 🎛️ Interfaz Ágil (Segmented Controls)
+- **Selección de Un Solo Toque**: Sustitución de los menús desplegables tradicionales (`<select>`) por controles segmentados de selección directa (*Segmented Controls*).
+- Optimización UX táctil para Tipo (`Gasto` / `Ingreso`), Moneda (`USD` / `VES`), Dirección de deuda (`Debo` / `Me deben`) y Filtros de búsqueda, permitiendo un registro ultra rápido desde dispositivos móviles y de escritorio.
+
 ---
 
 ## 🛠️ Stack Tecnológico
