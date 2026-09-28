@@ -2,6 +2,7 @@
   import TransactionsView from './lib/components/TransactionsView.svelte'
   import DebtsView from './lib/components/DebtsView.svelte'
   import FixedExpensesView from './lib/components/FixedExpensesView.svelte'
+  import BackupView from './lib/components/BackupView.svelte'
 
   let vista = $state('transacciones')
 </script>
@@ -20,6 +21,9 @@
   <button type="button" class:activo={vista === 'gastosFijos'} onclick={() => (vista = 'gastosFijos')}>
     Gastos fijos
   </button>
+  <button type="button" class:activo={vista === 'respaldo'} onclick={() => (vista = 'respaldo')}>
+    Respaldo
+  </button>
 </nav>
 
 <main>
@@ -29,5 +33,7 @@
     <DebtsView />
   {:else if vista === 'gastosFijos'}
     <FixedExpensesView />
+  {:else if vista === 'respaldo'}
+    <BackupView />
   {/if}
 </main>

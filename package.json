@@ -18,6 +18,8 @@
     "vitest": "^4.1.11"
   },
   "dependencies": {
-    "dexie": "^4.4.5"
+    "dexie": "^4.4.5",
+    "peerjs": "^1.5.5",
+    "qrcode": "^1.5.4"
   }
 }
