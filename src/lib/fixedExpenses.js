@@ -3,11 +3,11 @@ import { calcularMovimientoDeDinero, redondear } from './money.js'
 
 /**
  * Define un nuevo gasto fijo (la plantilla recurrente).
- * Ver specs/fixed-expenses/spec.md - Requirement: Definir un gasto fijo.
+ * Ver specs/fixed-expenses/spec.md - Requirement: Definir un gasto fijo, Categorizar gastos fijos.
  *
- * @param {{ nombre: string, monto: number, diaVencimiento: number, frecuencia?: 'mensual' }} datos
+ * @param {{ nombre: string, monto: number, diaVencimiento: number, frecuencia?: 'mensual', categoria?: string }} datos
  */
-export async function definirGastoFijo({ nombre, monto, diaVencimiento, frecuencia = 'mensual' }) {
+export async function definirGastoFijo({ nombre, monto, diaVencimiento, frecuencia = 'mensual', categoria }) {
   if (!nombre) throw new Error('El nombre es requerido')
   if (!monto || monto <= 0) throw new Error('El monto debe ser mayor a 0')
   if (!diaVencimiento || diaVencimiento < 1 || diaVencimiento > 31) {
@@ -20,6 +20,7 @@ export async function definirGastoFijo({ nombre, monto, diaVencimiento, frecuenc
     diaVencimiento,
     frecuencia,
     activo: 1, // IndexedDB no admite boolean como clave indexada
+    categoria: categoria ? categoria.trim() : '',
   })
 
   return db.gastosFijos.get(id)

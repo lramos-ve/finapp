@@ -160,4 +160,52 @@ describe('transactions', () => {
     expect(balance.balance).toBe(100)
     expect(balance.totalGastos).toBe(0)
   })
+
+  it('permite asociar categoría y filtrar transacciones por categoría', async () => {
+    const t1 = await registrarTransaccion({
+      tipo: 'gasto',
+      monto: 25,
+      moneda: 'USD',
+      fecha: '2026-01-01',
+      descripcion: 'Almuerzo',
+      categoria: 'Alimentación',
+    })
+    const t2 = await registrarTransaccion({
+      tipo: 'gasto',
+      monto: 15,
+      moneda: 'USD',
+      fecha: '2026-01-02',
+      descripcion: 'Gasolina',
+      categoria: 'Transporte',
+    })
+    const t3 = await registrarTransaccion({
+      tipo: 'gasto',
+      monto: 30,
+      moneda: 'USD',
+      fecha: '2026-01-03',
+      descripcion: 'Veterinario',
+      categoria: 'Mascotas',
+    })
+
+    expect(t1.categoria).toBe('Alimentación')
+    expect(t3.categoria).toBe('Mascotas')
+
+    const filtradas = await listarTransacciones({ categoria: 'Transporte' })
+    expect(filtradas).toHaveLength(1)
+    expect(filtradas[0].id).toBe(t2.id)
+
+    // Actualizar categoría de t2
+    const actualizada = await actualizarTransaccion(t2.id, {
+      tipo: 'gasto',
+      monto: 15,
+      moneda: 'USD',
+      fecha: '2026-01-02',
+      descripcion: 'Gasolina',
+      categoria: 'Alimentación',
+    })
+    expect(actualizada.categoria).toBe('Alimentación')
+
+    const ahoraAlimentacion = await listarTransacciones({ categoria: 'Alimentación' })
+    expect(ahoraAlimentacion).toHaveLength(2)
+  })
 })

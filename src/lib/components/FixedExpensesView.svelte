@@ -9,14 +9,17 @@
     periodoDe,
     siguientePeriodo,
   } from '../fixedExpenses.js'
+  import { obtenerCategoriasDisponibles } from '../categories.js'
   import Icon from './Icon.svelte'
 
   let nombre = $state('')
+  let categoria = $state('')
   let monto = $state('')
   let diaVencimiento = $state('')
   let error = $state('')
 
   let gastosFijos = $state([])
+  let categoriasDisponibles = $state([])
   let instanciasPorPeriodo = $state([])
 
   let pagoAbiertoPara = $state(null)
@@ -30,13 +33,18 @@
     return new Date().toISOString().slice(0, 10)
   }
 
+  function gastoFijoDe(gastoFijoId) {
+    return gastosFijos.find((g) => g.id === gastoFijoId)
+  }
+
   function nombreDe(gastoFijoId) {
-    return gastosFijos.find((g) => g.id === gastoFijoId)?.nombre ?? '—'
+    return gastoFijoDe(gastoFijoId)?.nombre ?? '—'
   }
 
   async function cargar() {
     await sincronizarGastosFijos()
     gastosFijos = await listarGastosFijos({})
+    categoriasDisponibles = obtenerCategoriasDisponibles(gastosFijos)
 
     const periodoActual = periodoDe(new Date())
     const periodoSiguiente = siguientePeriodo(periodoActual)
@@ -56,8 +64,14 @@
     e.preventDefault()
     error = ''
     try {
-      await definirGastoFijo({ nombre, monto: Number(monto), diaVencimiento: Number(diaVencimiento) })
+      await definirGastoFijo({
+        nombre,
+        monto: Number(monto),
+        diaVencimiento: Number(diaVencimiento),
+        categoria,
+      })
       nombre = ''
+      categoria = ''
       monto = ''
       diaVencimiento = ''
       await cargar()
@@ -110,6 +124,22 @@
         <input type="text" bind:value={nombre} required />
       </label>
       <label>
+        Categoría
+        <input
+          type="text"
+          list="categorias-lista-gf"
+          bind:value={categoria}
+          placeholder="Selecciona o escribe..."
+        />
+        <datalist id="categorias-lista-gf">
+          {#each categoriasDisponibles as cat}
+            <option value={cat}></option>
+          {/each}
+        </datalist>
+      </label>
+    </div>
+    <div class="fila">
+      <label>
         Monto (USD)
         <input type="number" step="0.01" min="0.01" bind:value={monto} required />
       </label>
@@ -131,6 +161,9 @@
     <ul class="lista">
       {#each gastosFijos.filter((g) => g.activo) as g (g.id)}
         <li>
+          {#if g.categoria}
+            <span class="badge-categoria">{g.categoria}</span>
+          {/if}
           <span class="descripcion">{g.nombre} — ${g.monto.toFixed(2)} (día {g.diaVencimiento})</span>
           <button type="button" class="boton-accion desactivar" onclick={() => desactivar(g.id)}>
             <Icon name="power" size={14} />
@@ -152,6 +185,9 @@
         {#each grupo.instancias as i (i.id)}
           <li class:gasto={i.estado === 'vencida'} class:pagado={i.estado === 'pagado'}>
             <div class="deuda-fila">
+              {#if gastoFijoDe(i.gastoFijoId)?.categoria}
+                <span class="badge-categoria">{gastoFijoDe(i.gastoFijoId).categoria}</span>
+              {/if}
               <span class="descripcion">{nombreDe(i.gastoFijoId)}</span>
               <span class="monto-usd">
                 ${i.saldoPendiente.toFixed(2)}

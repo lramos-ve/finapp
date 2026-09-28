@@ -591,6 +591,19 @@ form > button:first-of-type:active:not(:disabled) {
   font-weight: 600;
 }
 
+.badge-categoria {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--texto-tenue);
+  background: var(--bg);
+  box-shadow: var(--neu-inset-sm);
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
 .abono-form {
   margin-top: 0.75rem;
   padding-top: 0.75rem;

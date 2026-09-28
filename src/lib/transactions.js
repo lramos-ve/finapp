@@ -3,12 +3,12 @@ import { calcularMovimientoDeDinero, redondear } from './money.js'
 
 /**
  * Registra una transacción (ingreso o gasto), en USD o VES.
- * Ver specs/transactions/spec.md - Requirement: Registrar una transacción.
+ * Ver specs/transactions/spec.md - Requirement: Registrar una transacción, Categorizar transacciones.
  *
  * @param {{ tipo: 'ingreso'|'gasto', monto: number, moneda: 'USD'|'VES',
- *           tasaBCV?: number, fecha: string, descripcion?: string }} datos
+ *           tasaBCV?: number, fecha: string, descripcion?: string, categoria?: string }} datos
  */
-export async function registrarTransaccion({ tipo, monto, moneda, tasaBCV, fecha, descripcion }) {
+export async function registrarTransaccion({ tipo, monto, moneda, tasaBCV, fecha, descripcion, categoria }) {
   if (tipo !== 'ingreso' && tipo !== 'gasto') {
     throw new Error("El tipo debe ser 'ingreso' o 'gasto'")
   }
@@ -23,6 +23,7 @@ export async function registrarTransaccion({ tipo, monto, moneda, tasaBCV, fecha
     ...movimiento,
     fecha,
     descripcion: descripcion ?? '',
+    categoria: categoria ? categoria.trim() : '',
   })
 
   return db.transacciones.get(id)
@@ -30,13 +31,13 @@ export async function registrarTransaccion({ tipo, monto, moneda, tasaBCV, fecha
 
 /**
  * Actualiza los datos de una transacción existente y recalcula montos en USD.
- * Ver specs/transactions/spec.md - Requirement: Actualizar una transacción existente.
+ * Ver specs/transactions/spec.md - Requirement: Actualizar una transacción existente, Categorizar transacciones.
  *
  * @param {number} id
  * @param {{ tipo: 'ingreso'|'gasto', monto: number, moneda: 'USD'|'VES',
- *           tasaBCV?: number, fecha: string, descripcion?: string }} datos
+ *           tasaBCV?: number, fecha: string, descripcion?: string, categoria?: string }} datos
  */
-export async function actualizarTransaccion(id, { tipo, monto, moneda, tasaBCV, fecha, descripcion }) {
+export async function actualizarTransaccion(id, { tipo, monto, moneda, tasaBCV, fecha, descripcion, categoria }) {
   const existente = await db.transacciones.get(id)
   if (!existente) {
     throw new Error('La transacción no existe')
@@ -56,6 +57,7 @@ export async function actualizarTransaccion(id, { tipo, monto, moneda, tasaBCV, 
     ...movimiento,
     fecha,
     descripcion: descripcion ?? '',
+    categoria: categoria !== undefined ? (categoria ? categoria.trim() : '') : (existente.categoria ?? ''),
   })
 
   return db.transacciones.get(id)
@@ -96,16 +98,17 @@ export async function obtenerBalance({ desde, hasta } = {}) {
 }
 
 /**
- * Lista transacciones filtradas por tipo, moneda y/o rango de fechas.
- * Ver specs/transactions/spec.md - Requirement: Listar y filtrar transacciones.
+ * Lista transacciones filtradas por tipo, moneda, categoría y/o rango de fechas.
+ * Ver specs/transactions/spec.md - Requirement: Listar y filtrar transacciones, Filtrar transacciones por categoría.
  *
- * @param {{ tipo?: 'ingreso'|'gasto', moneda?: 'USD'|'VES', desde?: string, hasta?: string }} filtros
+ * @param {{ tipo?: 'ingreso'|'gasto', moneda?: 'USD'|'VES', categoria?: string, desde?: string, hasta?: string }} filtros
  */
-export async function listarTransacciones({ tipo, moneda, desde, hasta } = {}) {
+export async function listarTransacciones({ tipo, moneda, categoria, desde, hasta } = {}) {
   let coleccion = await db.transacciones.toArray()
 
   if (tipo) coleccion = coleccion.filter((t) => t.tipo === tipo)
   if (moneda) coleccion = coleccion.filter((t) => t.moneda === moneda)
+  if (categoria) coleccion = coleccion.filter((t) => t.categoria === categoria)
   if (desde) coleccion = coleccion.filter((t) => t.fecha >= desde)
   if (hasta) coleccion = coleccion.filter((t) => t.fecha <= hasta)
 

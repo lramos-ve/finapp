@@ -113,4 +113,15 @@ describe('fixed-expenses', () => {
     // Solo las generadas antes de desactivar (enero y el look-ahead de febrero)
     expect(todas.map((i) => i.periodo).sort()).toEqual(['2026-01', '2026-02'])
   })
+
+  it('guarda la categoría asignada al definir un gasto fijo', async () => {
+    const gf = await definirGastoFijo({
+      nombre: 'Internet Fibra',
+      monto: 35,
+      diaVencimiento: 15,
+      categoria: 'Servicios',
+    })
+
+    expect(gf.categoria).toBe('Servicios')
+  })
 })

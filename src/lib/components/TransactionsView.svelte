@@ -7,6 +7,7 @@
     obtenerBalance,
   } from '../transactions.js'
   import { obtenerTasaBCV, obtenerUltimaTasaEnCache, guardarTasaEnCache } from '../bcv.js'
+  import { obtenerCategoriasDisponibles } from '../categories.js'
   import Icon from './Icon.svelte'
 
   let tipo = $state('gasto')
@@ -17,13 +18,16 @@
   let tasaInfo = $state('')
   let fecha = $state(hoyISO())
   let descripcion = $state('')
+  let categoria = $state('')
   let error = $state('')
   let editandoId = $state(null)
 
   let filtroTipo = $state('')
   let filtroMoneda = $state('')
+  let filtroCategoria = $state('')
 
   let transacciones = $state([])
+  let categoriasDisponibles = $state([])
   let balance = $state({ totalIngresos: 0, totalGastos: 0, balance: 0 })
 
   function hoyISO() {
@@ -31,9 +35,12 @@
   }
 
   async function cargar() {
+    const todas = await listarTransacciones({})
+    categoriasDisponibles = obtenerCategoriasDisponibles(todas)
     transacciones = await listarTransacciones({
       tipo: filtroTipo || undefined,
       moneda: filtroMoneda || undefined,
+      categoria: filtroCategoria || undefined,
     })
     balance = await obtenerBalance({})
   }
@@ -78,6 +85,7 @@
     tasaInfo = ''
     fecha = t.fecha
     descripcion = t.descripcion || ''
+    categoria = t.categoria || ''
     error = ''
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -86,6 +94,7 @@
     editandoId = null
     monto = ''
     descripcion = ''
+    categoria = ''
     tasaInfo = ''
     error = ''
   }
@@ -115,6 +124,7 @@
         tasaBCV: moneda === 'VES' ? Number(tasaBCV) : undefined,
         fecha,
         descripcion,
+        categoria,
       }
       if (editandoId) {
         await actualizarTransaccion(editandoId, datos)
@@ -124,6 +134,7 @@
       }
       monto = ''
       descripcion = ''
+      categoria = ''
       tasaInfo = ''
       await cargar()
     } catch (err) {
@@ -134,6 +145,7 @@
   $effect(() => {
     filtroTipo
     filtroMoneda
+    filtroCategoria
     cargar()
   })
 </script>
@@ -214,10 +226,26 @@
         <input type="date" bind:value={fecha} required />
       </label>
     </div>
-    <label class="ancho-completo">
-      Descripción
-      <input type="text" bind:value={descripcion} placeholder="opcional" />
-    </label>
+    <div class="fila">
+      <label>
+        Categoría
+        <input
+          type="text"
+          list="categorias-lista"
+          bind:value={categoria}
+          placeholder="Selecciona o escribe..."
+        />
+        <datalist id="categorias-lista">
+          {#each categoriasDisponibles as cat}
+            <option value={cat}></option>
+          {/each}
+        </datalist>
+      </label>
+      <label>
+        Descripción
+        <input type="text" bind:value={descripcion} placeholder="opcional" />
+      </label>
+    </div>
     {#if error}<p class="error">{error}</p>{/if}
     {#if editandoId}
       <div class="fila-botones">
@@ -261,6 +289,15 @@
         </button>
       </div>
     </label>
+    <label>
+      Categoría
+      <select bind:value={filtroCategoria}>
+        <option value="">Todas</option>
+        {#each categoriasDisponibles as cat}
+          <option value={cat}>{cat}</option>
+        {/each}
+      </select>
+    </label>
   </div>
   {#if transacciones.length === 0}
     <p class="vacio">Sin transacciones registradas todavía.</p>
@@ -269,6 +306,9 @@
       {#each transacciones as t (t.id)}
         <li class:ingreso={t.tipo === 'ingreso'} class:gasto={t.tipo === 'gasto'}>
           <span class="fecha">{t.fecha}</span>
+          {#if t.categoria}
+            <span class="badge-categoria">{t.categoria}</span>
+          {/if}
           <span class="descripcion">{t.descripcion || (t.tipo === 'ingreso' ? 'Ingreso' : 'Gasto')}</span>
           <span class="monto-original">
             {t.moneda === 'VES' ? `Bs. ${t.monto.toFixed(2)} (tasa ${t.tasaBCV})` : `$${t.monto.toFixed(2)}`}

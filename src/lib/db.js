@@ -38,3 +38,8 @@ db.version(1).stores({
   instanciasGastoFijo: '++id, gastoFijoId, periodo, estado, [gastoFijoId+periodo]',
   pagosGastoFijo: '++id, instanciaId, fecha',
 })
+
+db.version(2).stores({
+  transacciones: '++id, tipo, moneda, fecha, categoria',
+  gastosFijos: '++id, activo, categoria',
+})
