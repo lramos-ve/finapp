@@ -1,6 +1,12 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { db } from '../lib/db.js'
-import { registrarTransaccion, obtenerBalance, listarTransacciones } from '../lib/transactions.js'
+import {
+  registrarTransaccion,
+  actualizarTransaccion,
+  eliminarTransaccion,
+  obtenerBalance,
+  listarTransacciones,
+} from '../lib/transactions.js'
 
 beforeEach(async () => {
   await db.transacciones.clear()
@@ -61,5 +67,97 @@ describe('transactions', () => {
     const gastosVES = await listarTransacciones({ tipo: 'gasto', moneda: 'VES' })
     expect(gastosVES).toHaveLength(1)
     expect(gastosVES[0].moneda).toBe('VES')
+  })
+
+  it('actualiza una transacción existente y recalcula montos en USD', async () => {
+    const t = await registrarTransaccion({
+      tipo: 'gasto',
+      monto: 2000,
+      moneda: 'VES',
+      tasaBCV: 200,
+      fecha: '2026-01-01',
+      descripcion: 'Compra inicial',
+    })
+    expect(t.montoUSD).toBe(10)
+
+    const actualizada = await actualizarTransaccion(t.id, {
+      tipo: 'gasto',
+      monto: 4000,
+      moneda: 'VES',
+      tasaBCV: 200,
+      fecha: '2026-01-02',
+      descripcion: 'Compra corregida',
+    })
+
+    expect(actualizada.monto).toBe(4000)
+    expect(actualizada.montoUSD).toBe(20)
+    expect(actualizada.descripcion).toBe('Compra corregida')
+    expect(actualizada.fecha).toBe('2026-01-02')
+
+    // Ahora convertirla a USD
+    const enUSD = await actualizarTransaccion(t.id, {
+      tipo: 'ingreso',
+      monto: 50,
+      moneda: 'USD',
+      fecha: '2026-01-02',
+    })
+    expect(enUSD.tipo).toBe('ingreso')
+    expect(enUSD.monto).toBe(50)
+    expect(enUSD.montoUSD).toBe(50)
+    expect(enUSD.tasaBCV).toBeUndefined()
+  })
+
+  it('lanza error al actualizar si la transacción no existe o los datos son inválidos', async () => {
+    await expect(
+      actualizarTransaccion(999999, {
+        tipo: 'gasto',
+        monto: 10,
+        moneda: 'USD',
+        fecha: '2026-01-01',
+      })
+    ).rejects.toThrow('La transacción no existe')
+
+    const t = await registrarTransaccion({
+      tipo: 'gasto',
+      monto: 10,
+      moneda: 'USD',
+      fecha: '2026-01-01',
+    })
+
+    await expect(
+      actualizarTransaccion(t.id, {
+        tipo: 'invalido',
+        monto: 10,
+        moneda: 'USD',
+        fecha: '2026-01-01',
+      })
+    ).rejects.toThrow()
+
+    await expect(
+      actualizarTransaccion(t.id, {
+        tipo: 'gasto',
+        monto: 10,
+        moneda: 'USD',
+        fecha: '',
+      })
+    ).rejects.toThrow()
+  })
+
+  it('elimina una transacción y actualiza el balance de transacciones', async () => {
+    const t1 = await registrarTransaccion({ tipo: 'ingreso', monto: 100, moneda: 'USD', fecha: '2026-01-01' })
+    const t2 = await registrarTransaccion({ tipo: 'gasto', monto: 30, moneda: 'USD', fecha: '2026-01-02' })
+
+    let balance = await obtenerBalance({})
+    expect(balance.balance).toBe(70)
+
+    await eliminarTransaccion(t2.id)
+
+    const listado = await listarTransacciones({})
+    expect(listado).toHaveLength(1)
+    expect(listado[0].id).toBe(t1.id)
+
+    balance = await obtenerBalance({})
+    expect(balance.balance).toBe(100)
+    expect(balance.totalGastos).toBe(0)
   })
 })

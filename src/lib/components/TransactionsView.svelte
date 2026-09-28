@@ -1,5 +1,11 @@
 <script>
-  import { registrarTransaccion, listarTransacciones, obtenerBalance } from '../transactions.js'
+  import {
+    registrarTransaccion,
+    actualizarTransaccion,
+    eliminarTransaccion,
+    listarTransacciones,
+    obtenerBalance,
+  } from '../transactions.js'
   import { obtenerTasaBCV, obtenerUltimaTasaEnCache, guardarTasaEnCache } from '../bcv.js'
   import Icon from './Icon.svelte'
 
@@ -12,6 +18,7 @@
   let fecha = $state(hoyISO())
   let descripcion = $state('')
   let error = $state('')
+  let editandoId = $state(null)
 
   let filtroTipo = $state('')
   let filtroMoneda = $state('')
@@ -62,6 +69,38 @@
     }
   }
 
+  function cargarParaEditar(t) {
+    editandoId = t.id
+    tipo = t.tipo
+    monto = String(t.monto)
+    moneda = t.moneda
+    tasaBCV = t.tasaBCV ? String(t.tasaBCV) : ''
+    tasaInfo = ''
+    fecha = t.fecha
+    descripcion = t.descripcion || ''
+    error = ''
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  function cancelarEdicion() {
+    editandoId = null
+    monto = ''
+    descripcion = ''
+    tasaInfo = ''
+    error = ''
+  }
+
+  async function confirmarEliminar(t) {
+    const desc = t.descripcion ? `"${t.descripcion}"` : (t.tipo === 'ingreso' ? 'el ingreso' : 'el gasto')
+    if (window.confirm(`¿Estás seguro de que deseas eliminar ${desc}?`)) {
+      if (editandoId === t.id) {
+        cancelarEdicion()
+      }
+      await eliminarTransaccion(t.id)
+      await cargar()
+    }
+  }
+
   async function enviar(e) {
     e.preventDefault()
     error = ''
@@ -69,14 +108,20 @@
       if (moneda === 'VES' && tasaBCV) {
         guardarTasaEnCache(Number(tasaBCV))
       }
-      await registrarTransaccion({
+      const datos = {
         tipo,
         monto: Number(monto),
         moneda,
         tasaBCV: moneda === 'VES' ? Number(tasaBCV) : undefined,
         fecha,
         descripcion,
-      })
+      }
+      if (editandoId) {
+        await actualizarTransaccion(editandoId, datos)
+        editandoId = null
+      } else {
+        await registrarTransaccion(datos)
+      }
       monto = ''
       descripcion = ''
       tasaInfo = ''
@@ -112,7 +157,7 @@
 </section>
 
 <section class="panel">
-  <h2>Registrar transacción</h2>
+  <h2>{editandoId ? 'Editar transacción' : 'Registrar transacción'}</h2>
   <form onsubmit={enviar}>
     <div class="fila">
       <label>
@@ -174,7 +219,14 @@
       <input type="text" bind:value={descripcion} placeholder="opcional" />
     </label>
     {#if error}<p class="error">{error}</p>{/if}
-    <button type="submit">Registrar</button>
+    {#if editandoId}
+      <div class="fila-botones">
+        <button type="submit">Guardar cambios</button>
+        <button type="button" class="boton-secundario" onclick={cancelarEdicion}>Cancelar</button>
+      </div>
+    {:else}
+      <button type="submit">Registrar</button>
+    {/if}
   </form>
 </section>
 
@@ -222,6 +274,26 @@
             {t.moneda === 'VES' ? `Bs. ${t.monto.toFixed(2)} (tasa ${t.tasaBCV})` : `$${t.monto.toFixed(2)}`}
           </span>
           <span class="monto-usd">{t.tipo === 'ingreso' ? '+' : '-'}${t.montoUSD.toFixed(2)}</span>
+          <div class="acciones-fila">
+            <button
+              type="button"
+              class="boton-accion editar"
+              aria-label="Editar transacción"
+              title="Editar transacción"
+              onclick={() => cargarParaEditar(t)}
+            >
+              <Icon name="pencil" size={15} />
+            </button>
+            <button
+              type="button"
+              class="boton-accion eliminar"
+              aria-label="Eliminar transacción"
+              title="Eliminar transacción"
+              onclick={() => confirmarEliminar(t)}
+            >
+              <Icon name="trash" size={15} />
+            </button>
+          </div>
         </li>
       {/each}
     </ul>

@@ -29,6 +29,49 @@ export async function registrarTransaccion({ tipo, monto, moneda, tasaBCV, fecha
 }
 
 /**
+ * Actualiza los datos de una transacción existente y recalcula montos en USD.
+ * Ver specs/transactions/spec.md - Requirement: Actualizar una transacción existente.
+ *
+ * @param {number} id
+ * @param {{ tipo: 'ingreso'|'gasto', monto: number, moneda: 'USD'|'VES',
+ *           tasaBCV?: number, fecha: string, descripcion?: string }} datos
+ */
+export async function actualizarTransaccion(id, { tipo, monto, moneda, tasaBCV, fecha, descripcion }) {
+  const existente = await db.transacciones.get(id)
+  if (!existente) {
+    throw new Error('La transacción no existe')
+  }
+  if (tipo !== 'ingreso' && tipo !== 'gasto') {
+    throw new Error("El tipo debe ser 'ingreso' o 'gasto'")
+  }
+  if (!fecha) {
+    throw new Error('La fecha es requerida')
+  }
+
+  const movimiento = calcularMovimientoDeDinero({ monto, moneda, tasaBCV })
+
+  await db.transacciones.put({
+    id,
+    tipo,
+    ...movimiento,
+    fecha,
+    descripcion: descripcion ?? '',
+  })
+
+  return db.transacciones.get(id)
+}
+
+/**
+ * Elimina una transacción de la base de datos por su ID.
+ * Ver specs/transactions/spec.md - Requirement: Eliminar una transacción.
+ *
+ * @param {number} id
+ */
+export async function eliminarTransaccion(id) {
+  await db.transacciones.delete(id)
+}
+
+/**
  * Calcula el balance (ingresos, gastos, neto) en USD para un rango de fechas.
  * Ver specs/transactions/spec.md - Requirement: Consultar balance de transacciones.
  *

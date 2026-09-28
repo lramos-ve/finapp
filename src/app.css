@@ -659,6 +659,34 @@ form > button:first-of-type:active:not(:disabled) {
   color: var(--rojo);
 }
 
+.boton-accion.editar {
+  color: var(--texto-tenue);
+  min-width: 36px;
+  padding: 0.35rem 0.55rem;
+}
+
+.boton-accion.editar:hover {
+  color: var(--acento);
+}
+
+.fila-botones {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.fila-botones button {
+  flex: 1;
+}
+
+@media (min-width: 480px) {
+  .fila-botones button {
+    flex: none;
+    width: auto;
+  }
+}
+
 .acciones-fila {
   display: inline-flex;
   align-items: center;
