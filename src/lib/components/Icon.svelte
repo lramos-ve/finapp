@@ -117,6 +117,13 @@
   {:else if name === 'pencil' || name === 'edit'}
     <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
     <path d="m15 5 4 4" />
+  {:else if name === 'pie-chart' || name === 'chart' || name === 'statistics'}
+    <path d="M21.21 15.89A10 10 0 1 1 8 2.83" />
+    <path d="M22 12A10 10 0 0 0 12 2v10z" />
+  {:else if name === 'bar-chart'}
+    <line x1="12" x2="12" y1="20" y2="10" />
+    <line x1="18" x2="18" y1="20" y2="4" />
+    <line x1="6" x2="6" y1="20" y2="16" />
   {/if}
 </svg>
 

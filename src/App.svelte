@@ -1,5 +1,6 @@
 <script>
   import TransactionsView from './lib/components/TransactionsView.svelte'
+  import StatisticsView from './lib/components/StatisticsView.svelte'
   import DebtsView from './lib/components/DebtsView.svelte'
   import FixedExpensesView from './lib/components/FixedExpensesView.svelte'
   import BackupView from './lib/components/BackupView.svelte'
@@ -37,6 +38,15 @@
   </button>
   <button
     type="button"
+    class:activo={vista === 'estadisticas'}
+    onclick={() => (vista = 'estadisticas')}
+    aria-label="Estadísticas"
+  >
+    <Icon name="pie-chart" size={22} />
+    <span class="tooltip" role="tooltip">Estadísticas</span>
+  </button>
+  <button
+    type="button"
     class:activo={vista === 'deudas'}
     onclick={() => (vista = 'deudas')}
     aria-label="Deudas"
@@ -67,6 +77,8 @@
 <main>
   {#if vista === 'transacciones'}
     <TransactionsView />
+  {:else if vista === 'estadisticas'}
+    <StatisticsView />
   {:else if vista === 'deudas'}
     <DebtsView />
   {:else if vista === 'gastosFijos'}

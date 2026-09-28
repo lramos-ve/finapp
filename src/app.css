@@ -304,6 +304,10 @@ main {
   color: var(--rojo);
 }
 
+.card.ahorro .valor {
+  color: var(--acento);
+}
+
 form {
   display: flex;
   flex-direction: column;
