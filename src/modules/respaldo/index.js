@@ -1,0 +1,7 @@
+export { default as BackupView } from './components/BackupView.svelte'
+export { default as BackupActions } from './components/BackupActions.svelte'
+export { default as BackupPasswordModal } from './components/BackupPasswordModal.svelte'
+export { default as P2PSyncModal } from './components/P2PSyncModal.svelte'
+export { default as QRCodeDisplay } from './components/QRCodeDisplay.svelte'
+export * from './logic/backup.js'
+export * from './logic/p2p.js'

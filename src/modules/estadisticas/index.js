@@ -1,0 +1,5 @@
+export { default as StatisticsView } from './components/StatisticsView.svelte'
+export { default as MetricCards } from './components/MetricCards.svelte'
+export { default as DonutChart } from './components/DonutChart.svelte'
+export { default as BarChart } from './components/BarChart.svelte'
+export * from './logic/statistics.js'

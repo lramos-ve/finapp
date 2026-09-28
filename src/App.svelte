@@ -1,11 +1,10 @@
 <script>
-  import TransactionsView from './lib/components/TransactionsView.svelte'
-  import StatisticsView from './lib/components/StatisticsView.svelte'
-  import DebtsView from './lib/components/DebtsView.svelte'
-  import FixedExpensesView from './lib/components/FixedExpensesView.svelte'
-  import BackupView from './lib/components/BackupView.svelte'
-  import Icon from './lib/components/Icon.svelte'
-  import { theme } from './lib/theme.svelte.js'
+  import { TransactionsView } from './modules/transacciones/index.js'
+  import { StatisticsView } from './modules/estadisticas/index.js'
+  import { DebtsView } from './modules/deudas/index.js'
+  import { FixedExpensesView } from './modules/gastos-fijos/index.js'
+  import { BackupView } from './modules/respaldo/index.js'
+  import { Icon, theme } from './modules/shared/index.js'
 
   let vista = $state('transacciones')
 </script>
