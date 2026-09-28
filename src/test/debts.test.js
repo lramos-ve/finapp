@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { db } from '../lib/db.js'
-import { registrarDeuda, registrarAbono, obtenerTotalesPorDireccion } from '../lib/debts.js'
+import { registrarDeuda, registrarAbono, obtenerTotalesPorDireccion, eliminarDeuda } from '../lib/debts.js'
 
 beforeEach(async () => {
   await db.deudas.clear()
@@ -57,5 +57,30 @@ describe('debts', () => {
     const totales = await obtenerTotalesPorDireccion()
     expect(totales.debo).toBe(50)
     expect(totales.meDeben).toBe(30)
+  })
+
+  it('elimina una deuda sin abonos', async () => {
+    const d = await registrarDeuda({ persona: 'Carlos', direccion: 'debo', monto: 80, fecha: '2026-01-01' })
+    await eliminarDeuda(d.id)
+
+    const deudaEnDb = await db.deudas.get(d.id)
+    expect(deudaEnDb).toBeUndefined()
+  })
+
+  it('elimina una deuda y en cascada todos sus abonos asociados', async () => {
+    const d = await registrarDeuda({ persona: 'Laura', direccion: 'me_deben', monto: 100, fecha: '2026-01-01' })
+    await registrarAbono({ deudaId: d.id, monto: 30, moneda: 'USD', fecha: '2026-01-03' })
+    await registrarAbono({ deudaId: d.id, monto: 20, moneda: 'USD', fecha: '2026-01-04' })
+
+    const abonosAntes = await db.abonos.where('deudaId').equals(d.id).toArray()
+    expect(abonosAntes).toHaveLength(2)
+
+    await eliminarDeuda(d.id)
+
+    const deudaEnDb = await db.deudas.get(d.id)
+    expect(deudaEnDb).toBeUndefined()
+
+    const abonosDespues = await db.abonos.where('deudaId').equals(d.id).toArray()
+    expect(abonosDespues).toHaveLength(0)
   })
 })

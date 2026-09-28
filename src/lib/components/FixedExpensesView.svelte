@@ -9,6 +9,7 @@
     periodoDe,
     siguientePeriodo,
   } from '../fixedExpenses.js'
+  import Icon from './Icon.svelte'
 
   let nombre = $state('')
   let monto = $state('')
@@ -131,7 +132,10 @@
       {#each gastosFijos.filter((g) => g.activo) as g (g.id)}
         <li>
           <span class="descripcion">{g.nombre} — ${g.monto.toFixed(2)} (día {g.diaVencimiento})</span>
-          <button type="button" onclick={() => desactivar(g.id)}>Desactivar</button>
+          <button type="button" class="boton-accion desactivar" onclick={() => desactivar(g.id)}>
+            <Icon name="power" size={14} />
+            <span>Desactivar</span>
+          </button>
         </li>
       {/each}
     </ul>
@@ -157,7 +161,10 @@
               </span>
               <span class="estado">{i.estado}</span>
               {#if i.estado !== 'pagado'}
-                <button type="button" onclick={() => abrirPago(i.id)}>Pagar</button>
+                <button type="button" class="boton-accion pagar" onclick={() => abrirPago(i.id)}>
+                  <Icon name="check" size={14} />
+                  <span>Pagar</span>
+                </button>
               {/if}
             </div>
             {#if pagoAbiertoPara === i.id}
@@ -189,7 +196,7 @@
                 </label>
                 {#if pagoError}<p class="error">{pagoError}</p>{/if}
                 <button type="submit">Confirmar pago</button>
-                <button type="button" onclick={() => (pagoAbiertoPara = null)}>Cancelar</button>
+                <button type="button" class="boton-secundario" onclick={() => (pagoAbiertoPara = null)}>Cancelar</button>
               </form>
             {/if}
           </li>

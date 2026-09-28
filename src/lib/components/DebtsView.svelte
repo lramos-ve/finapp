@@ -1,5 +1,12 @@
 <script>
-  import { registrarDeuda, registrarAbono, listarDeudas, obtenerTotalesPorDireccion } from '../debts.js'
+  import {
+    registrarDeuda,
+    registrarAbono,
+    listarDeudas,
+    obtenerTotalesPorDireccion,
+    eliminarDeuda,
+  } from '../debts.js'
+  import Icon from './Icon.svelte'
 
   let persona = $state('')
   let direccion = $state('debo')
@@ -66,6 +73,23 @@
       await cargar()
     } catch (err) {
       abonoError = err.message
+    }
+  }
+
+  async function confirmarEliminarDeuda(deuda) {
+    const confirmacion = window.confirm(
+      `¿Eliminar la deuda de "${deuda.persona}"? Se eliminarán también todos los abonos asociados a ella.`
+    )
+    if (!confirmacion) return
+
+    try {
+      await eliminarDeuda(deuda.id)
+      if (abonoAbiertoPara === deuda.id) {
+        abonoAbiertoPara = null
+      }
+      await cargar()
+    } catch (err) {
+      error = err.message
     }
   }
 
@@ -140,9 +164,23 @@
             </span>
             <span class="monto-usd">${d.saldoPendiente.toFixed(2)} / ${d.montoOriginal.toFixed(2)}</span>
             <span class="estado">{d.estado}</span>
-            {#if d.estado === 'pendiente'}
-              <button type="button" onclick={() => abrirAbono(d.id)}>Abonar</button>
-            {/if}
+            <div class="acciones-fila">
+              {#if d.estado === 'pendiente'}
+                <button type="button" class="boton-accion abonar" onclick={() => abrirAbono(d.id)}>
+                  <Icon name="plus" size={15} />
+                  <span>Abonar</span>
+                </button>
+              {/if}
+              <button
+                type="button"
+                class="boton-accion eliminar"
+                aria-label="Eliminar deuda"
+                title="Eliminar deuda"
+                onclick={() => confirmarEliminarDeuda(d)}
+              >
+                <Icon name="trash" size={15} />
+              </button>
+            </div>
           </div>
           {#if abonoAbiertoPara === d.id}
             <form class="abono-form" onsubmit={(e) => enviarAbono(e, d.id)}>
@@ -173,7 +211,7 @@
               </label>
               {#if abonoError}<p class="error">{abonoError}</p>{/if}
               <button type="submit">Confirmar abono</button>
-              <button type="button" onclick={() => (abonoAbiertoPara = null)}>Cancelar</button>
+              <button type="button" class="boton-secundario" onclick={() => (abonoAbiertoPara = null)}>Cancelar</button>
             </form>
           {/if}
         </li>

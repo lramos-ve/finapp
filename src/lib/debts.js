@@ -98,3 +98,16 @@ export async function listarDeudas({ direccion } = {}) {
 export async function listarAbonos(deudaId) {
   return db.abonos.where('deudaId').equals(deudaId).sortBy('fecha')
 }
+
+/**
+ * Elimina una deuda y en cascada todos los abonos asociados a ella.
+ * Ver specs/debts/spec.md - Requirement: Eliminar una deuda.
+ *
+ * @param {number} deudaId
+ */
+export async function eliminarDeuda(deudaId) {
+  return db.transaction('rw', [db.deudas, db.abonos], async () => {
+    await db.abonos.where('deudaId').equals(deudaId).delete()
+    await db.deudas.delete(deudaId)
+  })
+}
