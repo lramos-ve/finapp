@@ -1,10 +1,14 @@
 <script>
   import { registrarTransaccion, listarTransacciones, obtenerBalance } from '../transactions.js'
+  import { obtenerTasaBCV, obtenerUltimaTasaEnCache, guardarTasaEnCache } from '../bcv.js'
+  import Icon from './Icon.svelte'
 
   let tipo = $state('gasto')
   let monto = $state('')
   let moneda = $state('USD')
   let tasaBCV = $state('')
+  let cargandoTasa = $state(false)
+  let tasaInfo = $state('')
   let fecha = $state(hoyISO())
   let descripcion = $state('')
   let error = $state('')
@@ -27,10 +31,44 @@
     balance = await obtenerBalance({})
   }
 
+  async function actualizarTasaBCV() {
+    cargandoTasa = true
+    tasaInfo = ''
+    try {
+      const res = await obtenerTasaBCV({ forzar: true })
+      tasaBCV = String(res.tasa)
+      if (res.error) {
+        tasaInfo = `Usando caché (${res.error})`
+      } else {
+        tasaInfo = 'Tasa oficial actualizada'
+      }
+    } catch {
+      tasaInfo = 'No se pudo obtener la tasa en línea'
+    } finally {
+      cargandoTasa = false
+    }
+  }
+
+  function alSeleccionarMoneda(m) {
+    moneda = m
+    if (m === 'VES' && !tasaBCV) {
+      const enCache = obtenerUltimaTasaEnCache()
+      if (enCache) {
+        tasaBCV = String(enCache)
+        tasaInfo = 'Última tasa guardada'
+      } else {
+        actualizarTasaBCV()
+      }
+    }
+  }
+
   async function enviar(e) {
     e.preventDefault()
     error = ''
     try {
+      if (moneda === 'VES' && tasaBCV) {
+        guardarTasaEnCache(Number(tasaBCV))
+      }
       await registrarTransaccion({
         tipo,
         monto: Number(monto),
@@ -40,8 +78,8 @@
         descripcion,
       })
       monto = ''
-      tasaBCV = ''
       descripcion = ''
+      tasaInfo = ''
       await cargar()
     } catch (err) {
       error = err.message
@@ -91,10 +129,10 @@
       <label>
         Moneda
         <div class="control-segmentado">
-          <button type="button" class:activo={moneda === 'USD'} onclick={() => (moneda = 'USD')}>
+          <button type="button" class:activo={moneda === 'USD'} onclick={() => alSeleccionarMoneda('USD')}>
             USD
           </button>
-          <button type="button" class:activo={moneda === 'VES'} onclick={() => (moneda = 'VES')}>
+          <button type="button" class:activo={moneda === 'VES'} onclick={() => alSeleccionarMoneda('VES')}>
             VES
           </button>
         </div>
@@ -108,7 +146,22 @@
       {#if moneda === 'VES'}
         <label>
           Tasa BCV
-          <input type="number" step="0.01" min="0.01" bind:value={tasaBCV} required />
+          <div class="campo-tasa-bcv">
+            <input type="number" step="0.01" min="0.01" bind:value={tasaBCV} required />
+            <button
+              type="button"
+              class="boton-bcv-fetch"
+              disabled={cargandoTasa}
+              onclick={actualizarTasaBCV}
+              aria-label="Actualizar tasa BCV"
+              title={cargandoTasa ? 'Consultando tasa...' : 'Consultar tasa oficial BCV'}
+            >
+              <Icon name="refresh-cw" size={16} class={cargandoTasa ? 'girando' : ''} />
+            </button>
+          </div>
+          {#if tasaInfo}
+            <span class="tasa-bcv-info">{tasaInfo}</span>
+          {/if}
         </label>
       {/if}
       <label>

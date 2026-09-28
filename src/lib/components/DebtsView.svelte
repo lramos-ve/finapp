@@ -6,6 +6,7 @@
     obtenerTotalesPorDireccion,
     eliminarDeuda,
   } from '../debts.js'
+  import { obtenerTasaBCV, obtenerUltimaTasaEnCache, guardarTasaEnCache } from '../bcv.js'
   import Icon from './Icon.svelte'
 
   let persona = $state('')
@@ -23,6 +24,8 @@
   let abonoMonto = $state('')
   let abonoMoneda = $state('USD')
   let abonoTasaBCV = $state('')
+  let cargandoTasaAbono = $state(false)
+  let tasaAbonoInfo = $state('')
   let abonoFecha = $state(hoyISO())
   let abonoError = $state('')
 
@@ -54,14 +57,49 @@
     abonoMonto = ''
     abonoMoneda = 'USD'
     abonoTasaBCV = ''
+    tasaAbonoInfo = ''
     abonoFecha = hoyISO()
     abonoError = ''
+  }
+
+  async function actualizarTasaAbono() {
+    cargandoTasaAbono = true
+    tasaAbonoInfo = ''
+    try {
+      const res = await obtenerTasaBCV({ forzar: true })
+      abonoTasaBCV = String(res.tasa)
+      if (res.error) {
+        tasaAbonoInfo = `Usando caché (${res.error})`
+      } else {
+        tasaAbonoInfo = 'Tasa oficial actualizada'
+      }
+    } catch {
+      tasaAbonoInfo = 'No se pudo obtener la tasa en línea'
+    } finally {
+      cargandoTasaAbono = false
+    }
+  }
+
+  function alSeleccionarMonedaAbono(m) {
+    abonoMoneda = m
+    if (m === 'VES' && !abonoTasaBCV) {
+      const enCache = obtenerUltimaTasaEnCache()
+      if (enCache) {
+        abonoTasaBCV = String(enCache)
+        tasaAbonoInfo = 'Última tasa guardada'
+      } else {
+        actualizarTasaAbono()
+      }
+    }
   }
 
   async function enviarAbono(e, deudaId) {
     e.preventDefault()
     abonoError = ''
     try {
+      if (abonoMoneda === 'VES' && abonoTasaBCV) {
+        guardarTasaEnCache(Number(abonoTasaBCV))
+      }
       await registrarAbono({
         deudaId,
         monto: Number(abonoMonto),
@@ -70,6 +108,7 @@
         fecha: abonoFecha,
       })
       abonoAbiertoPara = null
+      tasaAbonoInfo = ''
       await cargar()
     } catch (err) {
       abonoError = err.message
@@ -191,10 +230,10 @@
               <label>
                 Moneda
                 <div class="control-segmentado">
-                  <button type="button" class:activo={abonoMoneda === 'USD'} onclick={() => (abonoMoneda = 'USD')}>
+                  <button type="button" class:activo={abonoMoneda === 'USD'} onclick={() => alSeleccionarMonedaAbono('USD')}>
                     USD
                   </button>
-                  <button type="button" class:activo={abonoMoneda === 'VES'} onclick={() => (abonoMoneda = 'VES')}>
+                  <button type="button" class:activo={abonoMoneda === 'VES'} onclick={() => alSeleccionarMonedaAbono('VES')}>
                     VES
                   </button>
                 </div>
@@ -202,7 +241,22 @@
               {#if abonoMoneda === 'VES'}
                 <label>
                   Tasa BCV
-                  <input type="number" step="0.01" min="0.01" bind:value={abonoTasaBCV} required />
+                  <div class="campo-tasa-bcv">
+                    <input type="number" step="0.01" min="0.01" bind:value={abonoTasaBCV} required />
+                    <button
+                      type="button"
+                      class="boton-bcv-fetch"
+                      disabled={cargandoTasaAbono}
+                      onclick={actualizarTasaAbono}
+                      aria-label="Actualizar tasa BCV"
+                      title={cargandoTasaAbono ? 'Consultando tasa...' : 'Consultar tasa oficial BCV'}
+                    >
+                      <Icon name="refresh-cw" size={16} class={cargandoTasaAbono ? 'girando' : ''} />
+                    </button>
+                  </div>
+                  {#if tasaAbonoInfo}
+                    <span class="tasa-bcv-info">{tasaAbonoInfo}</span>
+                  {/if}
                 </label>
               {/if}
               <label>

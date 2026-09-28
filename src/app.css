@@ -360,6 +360,70 @@ select:focus {
   box-shadow: var(--neu-inset), 0 0 0 2px var(--acento);
 }
 
+/* Grupo de entrada de tasa BCV con botón de recarga */
+.campo-tasa-bcv {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.campo-tasa-bcv input {
+  flex: 1;
+  min-width: 0;
+}
+
+.boton-bcv-fetch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  box-shadow: var(--neu-elevated-sm);
+  border: none;
+  border-radius: 12px;
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  min-height: 42px;
+  color: var(--acento);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.boton-bcv-fetch:hover:not(:disabled) {
+  box-shadow: var(--neu-hover);
+  transform: translateY(-1px);
+}
+
+.boton-bcv-fetch:active:not(:disabled) {
+  box-shadow: var(--neu-inset-sm);
+  transform: translateY(0);
+}
+
+.boton-bcv-fetch:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.tasa-bcv-info {
+  font-size: 0.75rem;
+  color: var(--texto-tenue);
+  margin-top: 0.2rem;
+}
+
+@keyframes girar {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.girando {
+  animation: girar 1s linear infinite;
+}
+
 /* Controles segmentados Neumórficos */
 .control-segmentado {
   display: flex;
