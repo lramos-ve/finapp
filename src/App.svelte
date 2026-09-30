@@ -1,6 +1,7 @@
 <script>
   import { TransactionsView } from './modules/transacciones/index.js'
   import { StatisticsView } from './modules/estadisticas/index.js'
+  import { CalculatorView } from './modules/calculadora/index.js'
   import { DebtsView } from './modules/deudas/index.js'
   import { FixedExpensesView } from './modules/gastos-fijos/index.js'
   import { BackupView } from './modules/respaldo/index.js'
@@ -46,6 +47,15 @@
   </button>
   <button
     type="button"
+    class:activo={vista === 'calculadora'}
+    onclick={() => (vista = 'calculadora')}
+    aria-label="Calculadora"
+  >
+    <Icon name="calculator" size={22} />
+    <span class="tooltip" role="tooltip">Calculadora</span>
+  </button>
+  <button
+    type="button"
     class:activo={vista === 'deudas'}
     onclick={() => (vista = 'deudas')}
     aria-label="Deudas"
@@ -78,6 +88,8 @@
     <TransactionsView />
   {:else if vista === 'estadisticas'}
     <StatisticsView />
+  {:else if vista === 'calculadora'}
+    <CalculatorView />
   {:else if vista === 'deudas'}
     <DebtsView />
   {:else if vista === 'gastosFijos'}

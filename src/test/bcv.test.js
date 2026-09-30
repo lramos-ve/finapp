@@ -1,10 +1,14 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import {
   obtenerUltimaTasaEnCache,
+  obtenerUltimaTasaEuroEnCache,
   guardarTasaEnCache,
+  guardarTasaEuroEnCache,
   obtenerDetalleCacheBCV,
   obtenerTasaBCV,
-} from '../lib/bcv.js'
+  obtenerTasaEuroBCV,
+  obtenerTasasOficialesBCV,
+} from '../modules/shared/services/bcv.js'
 
 describe('bcv service', () => {
   beforeEach(() => {
@@ -24,7 +28,19 @@ describe('bcv service', () => {
 
     const detalle = obtenerDetalleCacheBCV()
     expect(detalle.tasa).toBe(850.5)
+    expect(detalle.tasaUSD).toBe(850.5)
     expect(detalle.fechaActualizacion).toBe('2026-09-28T00:00:00Z')
+  })
+
+  it('guarda y recupera la tasa del euro en localStorage', () => {
+    expect(obtenerUltimaTasaEuroEnCache()).toBeNull()
+
+    guardarTasaEuroEnCache(976.9, '2026-09-28T00:00:00Z')
+    expect(obtenerUltimaTasaEuroEnCache()).toBe(976.9)
+
+    const detalle = obtenerDetalleCacheBCV()
+    expect(detalle.tasaEUR).toBe(976.9)
+    expect(detalle.fechaActualizacionEUR).toBe('2026-09-28T00:00:00Z')
   })
 
   it('ignora valores inválidos al guardar en caché', () => {
@@ -33,6 +49,9 @@ describe('bcv service', () => {
 
     guardarTasaEnCache('invalido')
     expect(obtenerUltimaTasaEnCache()).toBeNull()
+
+    guardarTasaEuroEnCache(-10)
+    expect(obtenerUltimaTasaEuroEnCache()).toBeNull()
   })
 
   it('obtiene la tasa desde la API remota y la almacena en caché', async () => {
@@ -56,6 +75,28 @@ describe('bcv service', () => {
 
     // Se guardó en caché
     expect(obtenerUltimaTasaEnCache()).toBe(857.01)
+  })
+
+  it('obtiene la tasa del euro desde la API remota y la almacena en caché', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          moneda: 'EUR',
+          fuente: 'oficial',
+          promedio: 976.904,
+          fechaActualizacion: '2026-09-28T00:00:00-04:00',
+        }),
+      })
+    )
+
+    const resultado = await obtenerTasaEuroBCV({ forzar: true })
+    expect(resultado.tasa).toBe(976.9)
+    expect(resultado.desdeCache).toBe(false)
+    expect(resultado.fechaActualizacion).toBe('2026-09-28T00:00:00-04:00')
+
+    expect(obtenerUltimaTasaEuroEnCache()).toBe(976.9)
   })
 
   it('retorna el valor en caché directamente cuando forzar es false', async () => {
@@ -90,5 +131,27 @@ describe('bcv service', () => {
     )
 
     await expect(obtenerTasaBCV({ forzar: true })).rejects.toThrow('Servidor caído')
+  })
+
+  it('consulta ambas tasas oficiales (USD y EUR) simultáneamente', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockImplementation((url) => {
+        if (url.includes('dolares')) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({ promedio: 857.0, fechaActualizacion: '2026-09-28' }),
+          })
+        }
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ promedio: 976.9, fechaActualizacion: '2026-09-28' }),
+        })
+      })
+    )
+
+    const tasas = await obtenerTasasOficialesBCV({ forzar: true })
+    expect(tasas.usd.tasa).toBe(857.0)
+    expect(tasas.eur.tasa).toBe(976.9)
   })
 })
