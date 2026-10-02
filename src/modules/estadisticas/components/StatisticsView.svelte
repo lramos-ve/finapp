@@ -75,9 +75,9 @@
       const { desde, hasta } = rangoDePeriodo(periodoSeleccionado)
       const txsMes = transacciones.filter((t) => t.fecha >= desde && t.fecha <= hasta)
 
-      resumen = calcularResumenPeriodo(txsMes)
-      distribucion = calcularDistribucionCategorias(txsMes)
-      comparativa = calcularComparativaMensual(transacciones, 6)
+      resumen = await calcularResumenPeriodo({ transacciones: txsMes })
+      distribucion = await calcularDistribucionCategorias({ transacciones: txsMes })
+      comparativa = await calcularComparativaMensual({ transacciones, meses: 6 })
     } finally {
       cargando = false
     }
