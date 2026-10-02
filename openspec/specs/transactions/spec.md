@@ -59,15 +59,23 @@ El sistema SHALL permitir consultar el total de ingresos, el total de gastos y e
 - **THEN** el sistema muestra un balance de $200 para ese mes
 
 ### Requirement: Listar y filtrar transacciones
-El sistema SHALL permitir listar y filtrar las transacciones registradas por tipo (ingreso/gasto), moneda y rango de fechas o categoría dentro de la vista analítica del historial, mientras que la vista principal de transacciones SHALL mantenerse enfocada en el balance general y en el formulario de registro rápido.
+El sistema SHALL permitir listar y filtrar las transacciones registradas por tipo (ingreso/gasto), moneda y categoría a través de una tarjeta emergente (pop-up modal) interactiva con estética neumórfica disparada por un botón de acción en la vista principal de transacciones, manteniendo la vista inicial limpia y centrada en el balance.
 
 #### Scenario: Filtrar gastos en bolívares
-- **WHEN** el usuario filtra por tipo `gasto` y moneda `VES`
-- **THEN** el sistema muestra solo las transacciones de gasto registradas en VES
+- **WHEN** el usuario filtra por tipo `gasto` y moneda `VES` dentro del modal de historial
+- **THEN** el sistema muestra solo las transacciones de gasto registradas en VES en la lista del modal.
 
 #### Scenario: Vista principal simplificada de transacciones
 - **WHEN** el usuario accede a la sección de transacciones
-- **THEN** la interfaz muestra el balance consolidado y el formulario de ingreso/gasto sin la lista extensa inferior, facilitando la captura ágil en dispositivos móviles.
+- **THEN** la interfaz muestra el balance consolidado y los botones de acción para registrar transacción y abrir el historial, sin la lista extensa desplegada por defecto en la vista principal.
+
+#### Scenario: Apertura del historial como pop-up
+- **WHEN** el usuario pulsa el botón de ver historial en la vista principal de transacciones
+- **THEN** se despliega una tarjeta emergente centrada con sombra dual neumórfica y fondo difuminado conteniendo los filtros y la lista de transacciones.
+
+#### Scenario: Cierre del pop-up de historial
+- **WHEN** el usuario pulsa el botón de cerrar (x), presiona Escape o pulsa fuera de la tarjeta emergente del historial
+- **THEN** el pop-up se cierra inmediatamente y regresa a la vista de balance.
 
 ### Requirement: Actualizar una transacción existente
 El sistema SHALL permitir al usuario modificar los datos de una transacción existente (tipo, monto, moneda, tasa BCV, fecha y descripción), recalculando de manera consistente el monto equivalente en USD y actualizando el balance general.
