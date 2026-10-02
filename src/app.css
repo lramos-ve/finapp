@@ -258,6 +258,93 @@ main {
   font-weight: 600;
 }
 
+/* Tarjeta Colapsable / Desplegable Neumórfica */
+.panel-colapsable {
+  background: var(--bg);
+  box-shadow: var(--neu-elevated);
+  border-radius: 18px;
+  margin-bottom: 1.5rem;
+  overflow: visible;
+  transition: background-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.panel-colapsable-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 1.15rem 1.25rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--texto);
+  text-align: left;
+  font-family: inherit;
+  font-size: 0.95rem;
+  user-select: none;
+  border-radius: 18px;
+  transition: background-color 0.15s ease;
+}
+
+.panel-colapsable-header:hover {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+[data-theme="dark"] .panel-colapsable-header:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.panel-colapsable-header:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--acento);
+}
+
+.panel-colapsable-titulo {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--texto);
+  letter-spacing: 0.02em;
+}
+
+.badge-contador {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: var(--bg);
+  box-shadow: var(--neu-inset-sm);
+  color: var(--acento);
+}
+
+.chevron-rotatorio {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--texto-tenue);
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.chevron-rotatorio.expandido {
+  transform: rotate(180deg);
+}
+
+.panel-colapsable-contenido {
+  padding: 0 1.25rem 1.25rem 1.25rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.04);
+  animation: aparecerPop 0.2s ease-out;
+}
+
+[data-theme="dark"] .panel-colapsable-contenido {
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
 .balance-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));

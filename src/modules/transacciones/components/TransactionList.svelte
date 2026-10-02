@@ -8,6 +8,7 @@
     filtroTipo = $bindable(''),
     filtroMoneda = $bindable(''),
     filtroCategoria = $bindable(''),
+    sinPanel = false,
     onEditar,
     onEliminar,
   } = $props()
@@ -20,9 +21,7 @@
   }
 </script>
 
-<section class="panel">
-  <h2>Transacciones</h2>
-
+{#snippet contenido()}
   <TransactionFilters
     {categoriasDisponibles}
     bind:filtroTipo
@@ -75,4 +74,15 @@
       {/each}
     </ul>
   {/if}
-</section>
+{/snippet}
+
+{#if sinPanel}
+  <div class="lista-transacciones-sin-panel">
+    {@render contenido()}
+  </div>
+{:else}
+  <section class="panel">
+    <h2>Transacciones</h2>
+    {@render contenido()}
+  </section>
+{/if}
