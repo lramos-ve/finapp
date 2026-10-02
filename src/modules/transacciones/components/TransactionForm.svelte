@@ -8,8 +8,10 @@
   let {
     categoriasDisponibles = [],
     editandoTransaccion = null,
+    esModal = false,
     onGuardar,
     onCancelarEdicion,
+    onCerrar,
   } = $props()
 
   let tipo = $state('gasto')
@@ -135,8 +137,7 @@
   }
 </script>
 
-<section class="panel">
-  <h2>{editandoTransaccion ? 'Editar transacción' : 'Registrar transacción'}</h2>
+{#snippet formBody()}
   <form onsubmit={enviar}>
     <div class="fila">
       <label>
@@ -226,4 +227,26 @@
       <button type="submit">Registrar</button>
     {/if}
   </form>
-</section>
+{/snippet}
+
+{#if esModal}
+  <div class="modal-header">
+    <h2>{editandoTransaccion ? 'Editar transacción' : 'Registrar transacción'}</h2>
+    {#if onCerrar}
+      <button
+        type="button"
+        class="boton-cerrar-modal"
+        onclick={onCerrar}
+        aria-label="Cerrar modal"
+      >
+        <Icon name="x" size={18} />
+      </button>
+    {/if}
+  </div>
+  {@render formBody()}
+{:else}
+  <section class="panel">
+    <h2>{editandoTransaccion ? 'Editar transacción' : 'Registrar transacción'}</h2>
+    {@render formBody()}
+  </section>
+{/if}
