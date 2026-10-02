@@ -7,7 +7,7 @@ Permite registrar y consultar movimientos puntuales de dinero (ingresos y gastos
 ## Requirements
 
 ### Requirement: Registrar una transacción
-El sistema SHALL permitir registrar una transacción con tipo (`ingreso` o `gasto`), monto, moneda (`USD` o `VES`), fecha y descripción opcional.
+El sistema SHALL permitir registrar una transacción con tipo (`ingreso` o `gasto`), monto, moneda (`USD` o `VES`), fecha y descripción opcional a través de una tarjeta emergente (pop-up modal) con estética neumórfica disparada por un botón de acción en la vista principal.
 
 #### Scenario: Registro de un ingreso en USD
 - **WHEN** el usuario registra un ingreso de $100 en USD
@@ -16,6 +16,14 @@ El sistema SHALL permitir registrar una transacción con tipo (`ingreso` o `gast
 #### Scenario: Registro de un gasto en VES
 - **WHEN** el usuario registra un gasto de Bs. 2,000 en VES
 - **THEN** el sistema requiere una tasa BCV para completar el registro
+
+#### Scenario: Apertura del formulario de registro como pop-up
+- **WHEN** el usuario pulsa el botón de registro de movimiento en la vista de transacciones
+- **THEN** se despliega una tarjeta emergente centrada con sombra dual neumórfica y fondo difuminado conteniendo los campos de captura.
+
+#### Scenario: Cierre del pop-up de transacción
+- **WHEN** el usuario pulsa el botón de cerrar (x), presiona Escape o pulsa fuera de la tarjeta emergente
+- **THEN** el pop-up se cierra inmediatamente sin guardar datos no confirmados y regresa a la vista de balance.
 
 ### Requirement: Conversión a USD congelada al registrar
 Cuando una transacción se registra en VES, el sistema SHALL solicitar la tasa BCV vigente (ingresada manualmente por el usuario) y calcular el monto equivalente en USD en el momento del registro. Ese equivalente SHALL quedar congelado y no SHALL recalcularse automáticamente aunque la tasa BCV cambie después.
