@@ -1,14 +1,5 @@
 <script>
-  import {
-    listarTransacciones,
-    actualizarTransaccion,
-    eliminarTransaccion,
-  } from '../../transacciones/index.js'
-  import { obtenerCategoriasDisponibles } from '../../transacciones/logic/categories.js'
-  import TransactionList from '../../transacciones/components/TransactionList.svelte'
-  import TransactionForm from '../../transacciones/components/TransactionForm.svelte'
-  import Icon from '../../shared/components/Icon.svelte'
-
+  import { listarTransacciones } from '../../transacciones/index.js'
   import {
     periodoDeFecha,
     formatearEtiquetaPeriodo,
@@ -30,15 +21,6 @@
   let comparativa = $state([])
   let cargando = $state(true)
 
-  // Estados para historial desplegable de transacciones
-  let historialExpandido = $state(false)
-  let todasTransacciones = $state([])
-  let categoriasDisponibles = $state([])
-  let filtroTipo = $state('')
-  let filtroMoneda = $state('')
-  let filtroCategoria = $state('')
-  let editandoTransaccion = $state(null)
-
   let opcionesPeriodos = $derived(
     periodosDisponibles.map((p) => ({
       value: p,
@@ -46,26 +28,10 @@
     }))
   )
 
-  let transaccionesDelMes = $derived.by(() => {
-    const { desde, hasta } = rangoDePeriodo(periodoSeleccionado)
-    return todasTransacciones.filter((t) => t.fecha >= desde && t.fecha <= hasta)
-  })
-
-  let transaccionesHistorial = $derived.by(() => {
-    return transaccionesDelMes.filter((t) => {
-      if (filtroTipo && t.tipo !== filtroTipo) return false
-      if (filtroMoneda && t.moneda !== filtroMoneda) return false
-      if (filtroCategoria && t.categoria !== filtroCategoria) return false
-      return true
-    })
-  })
-
   async function cargar() {
     cargando = true
     try {
       const transacciones = await listarTransacciones()
-      todasTransacciones = transacciones
-      categoriasDisponibles = obtenerCategoriasDisponibles(transacciones)
       periodosDisponibles = obtenerPeriodosDisponibles(transacciones)
 
       if (!periodosDisponibles.includes(periodoSeleccionado)) {
@@ -81,30 +47,6 @@
     } finally {
       cargando = false
     }
-  }
-
-  function iniciarEdicion(t) {
-    editandoTransaccion = t
-  }
-
-  function cancelarEdicion() {
-    editandoTransaccion = null
-  }
-
-  async function manejarGuardarEdicion(datos) {
-    if (editandoTransaccion) {
-      await actualizarTransaccion(editandoTransaccion.id, datos)
-      editandoTransaccion = null
-      await cargar()
-    }
-  }
-
-  async function manejarEliminar(id) {
-    if (editandoTransaccion?.id === id) {
-      cancelarEdicion()
-    }
-    await eliminarTransaccion(id)
-    await cargar()
   }
 
   $effect(() => {
@@ -130,51 +72,6 @@
 
     <!-- Tarjetas de métricas clave -->
     <MetricCards {resumen} />
-  </section>
-
-  <!-- Tarjeta Desplegable: Historial de Transacciones del Período -->
-  <section class="panel-colapsable">
-    <button
-      type="button"
-      class="panel-colapsable-header"
-      onclick={() => (historialExpandido = !historialExpandido)}
-      aria-expanded={historialExpandido}
-    >
-      <div class="panel-colapsable-titulo">
-        <Icon name="transactions" size={18} />
-        <span>Historial de Transacciones</span>
-        <span class="badge-contador">{transaccionesDelMes.length}</span>
-      </div>
-      <span class="chevron-rotatorio" class:expandido={historialExpandido}>
-        <Icon name="chevron-down" size={18} />
-      </span>
-    </button>
-
-    {#if historialExpandido}
-      <div class="panel-colapsable-contenido">
-        {#if editandoTransaccion}
-          <div class="panel-edicion-transaccion">
-            <TransactionForm
-              {categoriasDisponibles}
-              {editandoTransaccion}
-              onGuardar={manejarGuardarEdicion}
-              onCancelarEdicion={cancelarEdicion}
-            />
-          </div>
-        {/if}
-
-        <TransactionList
-          transacciones={transaccionesHistorial}
-          {categoriasDisponibles}
-          sinPanel={true}
-          bind:filtroTipo
-          bind:filtroMoneda
-          bind:filtroCategoria
-          onEditar={iniciarEdicion}
-          onEliminar={manejarEliminar}
-        />
-      </div>
-    {/if}
   </section>
 
   <!-- Gráfico de distribución de gastos por categoría -->
@@ -212,16 +109,6 @@
 
   .selector-periodo {
     min-width: 175px;
-  }
-
-  .panel-edicion-transaccion {
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-  }
-
-  [data-theme="dark"] .panel-edicion-transaccion {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   }
 
   .sr-only {

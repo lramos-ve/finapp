@@ -1229,6 +1229,19 @@ form > button:first-of-type:active:not(:disabled) {
   box-sizing: border-box;
 }
 
+.modal-neumorphic.modal-lg {
+  max-width: 640px;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-cuerpo-scroll {
+  overflow-y: auto;
+  padding-right: 0.25rem;
+  margin-right: -0.25rem;
+}
+
 [data-theme='light'] .modal-neumorphic {
   border: 1px solid rgba(255, 255, 255, 0.6);
 }
@@ -1292,25 +1305,34 @@ form > button:first-of-type:active:not(:disabled) {
   transform: translateY(0) scale(0.95);
 }
 
-/* Botón disparador de nueva transacción */
+/* Botones de acciones en Transacciones */
 .contenedor-acciones-transacciones {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  gap: 0.85rem;
   margin: 1.25rem 0 1.5rem 0;
 }
 
+@media (min-width: 480px) {
+  .contenedor-acciones-transacciones {
+    flex-direction: row;
+  }
+}
+
+.boton-accion-transacciones,
 .boton-nuevo-registro {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.6rem;
+  flex: 1;
   width: 100%;
   background: var(--bg);
   box-shadow: var(--neu-elevated);
   border: none;
   border-radius: 16px;
-  padding: 0.95rem 1.5rem;
-  font-size: 1rem;
+  padding: 0.95rem 1.25rem;
+  font-size: 0.95rem;
   font-weight: 700;
   color: var(--acento);
   cursor: pointer;
@@ -1318,12 +1340,29 @@ form > button:first-of-type:active:not(:disabled) {
   user-select: none;
 }
 
+.boton-accion-transacciones.secundario {
+  color: var(--texto);
+}
+
+.boton-accion-transacciones:hover,
 .boton-nuevo-registro:hover {
   box-shadow: var(--neu-hover);
   transform: translateY(-2px);
 }
 
+.boton-accion-transacciones:active,
 .boton-nuevo-registro:active {
   box-shadow: var(--neu-inset-sm);
   transform: translateY(0);
+}
+
+.boton-accion-transacciones .badge-contador {
+  background: var(--bg);
+  box-shadow: var(--neu-inset-sm);
+  color: var(--acento);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  margin-left: 0.25rem;
 }
