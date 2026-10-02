@@ -1,4 +1,5 @@
 <script>
+  import { onMount } from 'svelte'
   import { obtenerTasaBCV, obtenerUltimaTasaEnCache, guardarTasaEnCache } from '../../shared/services/bcv.js'
   import Icon from '../../shared/components/Icon.svelte'
 
@@ -20,30 +21,6 @@
   let categoria = $state('')
   let error = $state('')
 
-  $effect(() => {
-    if (editandoTransaccion) {
-      tipo = editandoTransaccion.tipo
-      monto = String(editandoTransaccion.monto)
-      moneda = editandoTransaccion.moneda
-      tasaBCV = editandoTransaccion.tasaBCV ? String(editandoTransaccion.tasaBCV) : ''
-      tasaInfo = ''
-      fecha = editandoTransaccion.fecha
-      descripcion = editandoTransaccion.descripcion || ''
-      categoria = editandoTransaccion.categoria || ''
-      error = ''
-    } else {
-      tipo = 'gasto'
-      monto = ''
-      moneda = 'USD'
-      tasaBCV = ''
-      tasaInfo = ''
-      fecha = new Date().toISOString().slice(0, 10)
-      descripcion = ''
-      categoria = ''
-      error = ''
-    }
-  })
-
   async function actualizarTasaBCV() {
     cargandoTasa = true
     tasaInfo = ''
@@ -62,31 +39,85 @@
     }
   }
 
-  function alSeleccionarMoneda(m) {
-    moneda = m
-    if (m === 'VES' && !tasaBCV) {
-      const enCache = obtenerUltimaTasaEnCache()
-      if (enCache) {
-        tasaBCV = String(enCache)
-        tasaInfo = 'Última tasa guardada'
-      } else {
-        actualizarTasaBCV()
-      }
+  function cargarTasaInicial() {
+    const enCache = obtenerUltimaTasaEnCache()
+    if (enCache) {
+      tasaBCV = String(enCache)
+      tasaInfo = 'Tasa oficial en caché'
+    } else {
+      actualizarTasaBCV()
     }
   }
+
+  onMount(() => {
+    if (!editandoTransaccion && !tasaBCV) {
+      cargarTasaInicial()
+    }
+  })
+
+  $effect(() => {
+    if (editandoTransaccion) {
+      tipo = editandoTransaccion.tipo
+      monto = String(editandoTransaccion.monto)
+      moneda = editandoTransaccion.moneda
+      tasaBCV = editandoTransaccion.tasaBCV ? String(editandoTransaccion.tasaBCV) : ''
+      tasaInfo = ''
+      fecha = editandoTransaccion.fecha
+      descripcion = editandoTransaccion.descripcion || ''
+      categoria = editandoTransaccion.categoria || ''
+      error = ''
+      if (!tasaBCV) {
+        cargarTasaInicial()
+      }
+    } else {
+      tipo = 'gasto'
+      monto = ''
+      moneda = 'USD'
+      fecha = new Date().toISOString().slice(0, 10)
+      descripcion = ''
+      categoria = ''
+      error = ''
+      if (!tasaBCV) {
+        cargarTasaInicial()
+      }
+    }
+  })
+
+  function alSeleccionarMoneda(m) {
+    moneda = m
+    if (!tasaBCV) {
+      cargarTasaInicial()
+    }
+  }
+
+  let montoNum = $derived(Number(monto) || 0)
+  let tasaNum = $derived(Number(tasaBCV) || 0)
+  let textoEquivalente = $derived.by(() => {
+    if (montoNum <= 0 || tasaNum <= 0) return ''
+    if (moneda === 'USD') {
+      const bs = montoNum * tasaNum
+      return `≈ Bs. ${bs.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+    }
+    if (moneda === 'VES') {
+      const usd = montoNum / tasaNum
+      return `≈ $${usd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+    }
+    return ''
+  })
 
   async function enviar(e) {
     e.preventDefault()
     error = ''
     try {
-      if (moneda === 'VES' && tasaBCV) {
-        guardarTasaEnCache(Number(tasaBCV))
+      const numTasa = Number(tasaBCV)
+      if (numTasa > 0) {
+        guardarTasaEnCache(numTasa)
       }
       await onGuardar({
         tipo,
         monto: Number(monto),
         moneda,
-        tasaBCV: moneda === 'VES' ? Number(tasaBCV) : undefined,
+        tasaBCV: numTasa > 0 ? numTasa : undefined,
         fecha,
         descripcion,
         categoria,
@@ -95,7 +126,6 @@
         monto = ''
         descripcion = ''
         categoria = ''
-        tasaInfo = ''
       }
     } catch (err) {
       error = err.message
@@ -133,29 +163,37 @@
     <div class="fila">
       <label>
         Monto
-        <input type="number" step="0.01" min="0.01" bind:value={monto} required />
+        <input type="number" step="0.01" min="0.01" bind:value={monto} required placeholder="0.00" />
+        {#if textoEquivalente}
+          <span class="preview-equivalente">{textoEquivalente}</span>
+        {/if}
       </label>
-      {#if moneda === 'VES'}
-        <label>
-          Tasa BCV
-          <div class="campo-tasa-bcv">
-            <input type="number" step="0.01" min="0.01" bind:value={tasaBCV} required />
-            <button
-              type="button"
-              class="boton-bcv-fetch"
-              disabled={cargandoTasa}
-              onclick={actualizarTasaBCV}
-              aria-label="Actualizar tasa BCV"
-              title={cargandoTasa ? 'Consultando tasa...' : 'Consultar tasa oficial BCV'}
-            >
-              <Icon name="refresh-cw" size={16} class={cargandoTasa ? 'girando' : ''} />
-            </button>
-          </div>
-          {#if tasaInfo}
-            <span class="tasa-bcv-info">{tasaInfo}</span>
-          {/if}
-        </label>
-      {/if}
+      <label>
+        Tasa BCV {moneda === 'USD' ? '(opcional)' : ''}
+        <div class="campo-tasa-bcv">
+          <input
+            type="number"
+            step="0.01"
+            min="0.01"
+            bind:value={tasaBCV}
+            required={moneda === 'VES'}
+            placeholder="Tasa oficial"
+          />
+          <button
+            type="button"
+            class="boton-bcv-fetch"
+            disabled={cargandoTasa}
+            onclick={actualizarTasaBCV}
+            aria-label="Actualizar tasa BCV"
+            title={cargandoTasa ? 'Consultando tasa...' : 'Consultar tasa oficial BCV'}
+          >
+            <Icon name="refresh-cw" size={16} class={cargandoTasa ? 'girando' : ''} />
+          </button>
+        </div>
+        {#if tasaInfo}
+          <span class="tasa-bcv-info">{tasaInfo}</span>
+        {/if}
+      </label>
       <label>
         Fecha
         <input type="date" bind:value={fecha} required />

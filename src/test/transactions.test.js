@@ -13,10 +13,23 @@ beforeEach(async () => {
 })
 
 describe('transactions', () => {
-  it('registra un ingreso en USD con montoUSD igual al monto', async () => {
+  it('registra un ingreso en USD con montoUSD igual al monto sin tasa', async () => {
     const t = await registrarTransaccion({ tipo: 'ingreso', monto: 100, moneda: 'USD', fecha: '2026-01-01' })
     expect(t.montoUSD).toBe(100)
     expect(t.tasaBCV).toBeUndefined()
+  })
+
+  it('registra una transacción en USD con tasa BCV y preserva tanto montoUSD como tasaBCV', async () => {
+    const t = await registrarTransaccion({
+      tipo: 'gasto',
+      monto: 50,
+      moneda: 'USD',
+      tasaBCV: 857.01,
+      fecha: '2026-01-01',
+    })
+    expect(t.monto).toBe(50)
+    expect(t.montoUSD).toBe(50)
+    expect(t.tasaBCV).toBe(857.01)
   })
 
   it('requiere tasa BCV para un gasto en VES y congela el equivalente en USD', async () => {
@@ -105,6 +118,17 @@ describe('transactions', () => {
     expect(enUSD.monto).toBe(50)
     expect(enUSD.montoUSD).toBe(50)
     expect(enUSD.tasaBCV).toBeUndefined()
+
+    // Ahora actualizar la transacción en USD añadiendo tasa BCV
+    const enUSDConTasa = await actualizarTransaccion(t.id, {
+      tipo: 'ingreso',
+      monto: 50,
+      moneda: 'USD',
+      tasaBCV: 860,
+      fecha: '2026-01-02',
+    })
+    expect(enUSDConTasa.montoUSD).toBe(50)
+    expect(enUSDConTasa.tasaBCV).toBe(860)
   })
 
   it('lanza error al actualizar si la transacción no existe o los datos son inválidos', async () => {

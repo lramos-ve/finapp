@@ -16,6 +16,9 @@ export function calcularMovimientoDeDinero({ monto, moneda, tasaBCV }) {
   }
 
   if (moneda === 'USD') {
+    if (tasaBCV != null && !Number.isNaN(Number(tasaBCV)) && Number(tasaBCV) > 0) {
+      return { monto, moneda, montoUSD: monto, tasaBCV: Number(tasaBCV) }
+    }
     return { monto, moneda, montoUSD: monto }
   }
 

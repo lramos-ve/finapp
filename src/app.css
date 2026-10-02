@@ -415,6 +415,19 @@ select:focus {
   margin-top: 0.2rem;
 }
 
+.preview-equivalente {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--acento);
+  margin-top: 0.25rem;
+  padding: 0.2rem 0.55rem;
+  background: var(--bg);
+  box-shadow: var(--neu-inset-sm);
+  border-radius: 8px;
+  width: fit-content;
+}
+
 @keyframes girar {
   from {
     transform: rotate(0deg);

@@ -42,7 +42,13 @@
           {/if}
           <span class="descripcion">{t.descripcion || (t.tipo === 'ingreso' ? 'Ingreso' : 'Gasto')}</span>
           <span class="monto-original">
-            {t.moneda === 'VES' ? `Bs. ${t.monto.toFixed(2)} (tasa ${t.tasaBCV})` : `$${t.monto.toFixed(2)}`}
+            {#if t.moneda === 'VES'}
+              Bs. {t.monto.toFixed(2)} (tasa {t.tasaBCV})
+            {:else if t.tasaBCV}
+              ${t.monto.toFixed(2)} (≈ Bs. {(t.monto * t.tasaBCV).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})
+            {:else}
+              ${t.monto.toFixed(2)}
+            {/if}
           </span>
           <span class="monto-usd">{t.tipo === 'ingreso' ? '+' : '-'}${t.montoUSD.toFixed(2)}</span>
           <div class="acciones-fila">
