@@ -434,10 +434,17 @@ select:focus {
 
 .neumorphic-select-arrow-btn {
   position: absolute;
-  right: 0.5rem;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: auto;
+  min-width: unset;
+  max-width: 32px;
+  height: auto;
+  min-height: unset;
   background: transparent;
   border: none;
-  padding: 0.35rem;
+  padding: 0.25rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -445,6 +452,7 @@ select:focus {
   color: var(--texto-tenue);
   border-radius: 6px;
   transition: color 0.15s ease;
+  z-index: 2;
 }
 
 .neumorphic-select-arrow-btn:hover {
@@ -458,6 +466,8 @@ select:focus {
   color: var(--texto-tenue);
   transition: transform 0.2s ease;
   pointer-events: none;
+  flex-shrink: 0;
+  margin-left: auto;
 }
 
 .neumorphic-select-arrow.open {

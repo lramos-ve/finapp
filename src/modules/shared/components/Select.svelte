@@ -237,9 +237,12 @@
 
 <style>
   .trigger-label {
+    flex: 1;
+    min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    margin-right: 0.5rem;
+    margin-right: 0.75rem;
+    text-align: left;
   }
 </style>
