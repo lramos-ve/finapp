@@ -1,6 +1,7 @@
 <script>
   import { obtenerTasaBCV, obtenerUltimaTasaEnCache, guardarTasaEnCache } from '../../shared/services/bcv.js'
   import Icon from '../../shared/components/Icon.svelte'
+  import DatePicker from '../../shared/components/DatePicker.svelte'
 
   let { deudaId, onConfirmar, onCancelar } = $props()
 
@@ -101,7 +102,7 @@
   {/if}
   <label>
     Fecha
-    <input type="date" bind:value={abonoFecha} required />
+    <DatePicker bind:value={abonoFecha} required />
   </label>
   {#if abonoError}<p class="error">{abonoError}</p>{/if}
   <button type="submit">Confirmar abono</button>

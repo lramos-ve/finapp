@@ -2,6 +2,7 @@
   import { onMount } from 'svelte'
   import { obtenerTasaBCV, obtenerUltimaTasaEnCache, guardarTasaEnCache } from '../../shared/services/bcv.js'
   import Icon from '../../shared/components/Icon.svelte'
+  import DatePicker from '../../shared/components/DatePicker.svelte'
 
   let {
     categoriasDisponibles = [],
@@ -196,7 +197,7 @@
       </label>
       <label>
         Fecha
-        <input type="date" bind:value={fecha} required />
+        <DatePicker bind:value={fecha} required />
       </label>
     </div>
     <div class="fila">

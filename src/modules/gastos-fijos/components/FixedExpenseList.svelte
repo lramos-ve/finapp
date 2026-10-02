@@ -1,5 +1,6 @@
 <script>
   import Icon from '../../shared/components/Icon.svelte'
+  import DatePicker from '../../shared/components/DatePicker.svelte'
 
   let {
     gastosFijos = [],
@@ -124,7 +125,7 @@
                 {/if}
                 <label>
                   Fecha
-                  <input type="date" bind:value={pagoFecha} required />
+                  <DatePicker bind:value={pagoFecha} required />
                 </label>
                 {#if pagoError}<p class="error">{pagoError}</p>{/if}
                 <button type="submit">Confirmar pago</button>

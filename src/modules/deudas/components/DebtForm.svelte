@@ -1,4 +1,6 @@
 <script>
+  import DatePicker from '../../shared/components/DatePicker.svelte'
+
   let { onRegistrar } = $props()
 
   let persona = $state('')
@@ -49,7 +51,7 @@
       </label>
       <label>
         Fecha
-        <input type="date" bind:value={fecha} required />
+        <DatePicker bind:value={fecha} required />
       </label>
     </div>
     <label class="ancho-completo">
