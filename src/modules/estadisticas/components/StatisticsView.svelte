@@ -13,6 +13,7 @@
   import MetricCards from './MetricCards.svelte'
   import DonutChart from './DonutChart.svelte'
   import BarChart from './BarChart.svelte'
+  import Select from '../../shared/components/Select.svelte'
 
   let periodoSeleccionado = $state(periodoDeFecha())
   let periodosDisponibles = $state([])
@@ -20,6 +21,13 @@
   let distribucion = $state([])
   let comparativa = $state([])
   let cargando = $state(true)
+
+  let opcionesPeriodos = $derived(
+    periodosDisponibles.map((p) => ({
+      value: p,
+      label: formatearEtiquetaPeriodo(p),
+    }))
+  )
 
   async function cargar() {
     cargando = true
@@ -55,11 +63,11 @@
       <h2>Estadísticas</h2>
       <div class="selector-periodo">
         <label for="select-periodo" class="sr-only">Seleccionar mes</label>
-        <select id="select-periodo" bind:value={periodoSeleccionado}>
-          {#each periodosDisponibles as p}
-            <option value={p}>{formatearEtiquetaPeriodo(p)}</option>
-          {/each}
-        </select>
+        <Select
+          id="select-periodo"
+          bind:value={periodoSeleccionado}
+          options={opcionesPeriodos}
+        />
       </div>
     </div>
 
@@ -100,11 +108,8 @@
     margin: 0;
   }
 
-  .selector-periodo select {
-    font-weight: 600;
-    font-size: 0.9rem;
-    padding: 0.5rem 0.85rem;
-    cursor: pointer;
+  .selector-periodo {
+    min-width: 175px;
   }
 
   .sr-only {

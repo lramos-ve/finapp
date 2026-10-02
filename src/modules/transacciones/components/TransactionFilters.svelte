@@ -1,10 +1,17 @@
 <script>
+  import Select from '../../shared/components/Select.svelte'
+
   let {
     categoriasDisponibles = [],
     filtroTipo = $bindable(''),
     filtroMoneda = $bindable(''),
     filtroCategoria = $bindable(''),
   } = $props()
+
+  let opcionesCategorias = $derived([
+    { value: '', label: 'Todas' },
+    ...categoriasDisponibles.map((c) => ({ value: c, label: c })),
+  ])
 </script>
 
 <div class="fila filtros">
@@ -38,11 +45,6 @@
   </label>
   <label>
     Categoría
-    <select bind:value={filtroCategoria}>
-      <option value="">Todas</option>
-      {#each categoriasDisponibles as cat}
-        <option value={cat}>{cat}</option>
-      {/each}
-    </select>
+    <Select bind:value={filtroCategoria} options={opcionesCategorias} placeholder="Todas" />
   </label>
 </div>

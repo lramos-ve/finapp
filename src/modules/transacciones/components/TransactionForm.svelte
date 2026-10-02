@@ -3,6 +3,7 @@
   import { obtenerTasaBCV, obtenerUltimaTasaEnCache, guardarTasaEnCache } from '../../shared/services/bcv.js'
   import Icon from '../../shared/components/Icon.svelte'
   import DatePicker from '../../shared/components/DatePicker.svelte'
+  import Select from '../../shared/components/Select.svelte'
 
   let {
     categoriasDisponibles = [],
@@ -203,17 +204,12 @@
     <div class="fila">
       <label>
         Categoría
-        <input
-          type="text"
-          list="categorias-lista"
+        <Select
           bind:value={categoria}
+          options={categoriasDisponibles}
+          allowCustom={true}
           placeholder="Selecciona o escribe..."
         />
-        <datalist id="categorias-lista">
-          {#each categoriasDisponibles as cat}
-            <option value={cat}></option>
-          {/each}
-        </datalist>
       </label>
       <label>
         Descripción
