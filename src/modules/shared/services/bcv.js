@@ -1,4 +1,5 @@
 export const BCV_CACHE_KEY = 'finapp_bcv_cache'
+export const BCV_PROXY_URL = '/api/bcv'
 export const DOLAR_API_URL = 'https://ve.dolarapi.com/v1/dolares/oficial'
 export const EURO_API_URL = 'https://ve.dolarapi.com/v1/euros/oficial'
 
@@ -37,7 +38,9 @@ export function obtenerUltimaTasaEuroEnCache() {
     const raw = getStorage()?.getItem(BCV_CACHE_KEY)
     if (!raw) return null
     const parsed = JSON.parse(raw)
-    return typeof parsed?.tasaEUR === 'number' && !isNaN(parsed.tasaEUR) ? parsed.tasaEUR : null
+    return typeof parsed?.tasaEUR === 'number' && !isNaN(parsed.tasaEUR) && parsed.tasaEUR >= UMBRAL_TASA_EUR_BS
+      ? parsed.tasaEUR
+      : null
   } catch {
     return null
   }
@@ -110,6 +113,24 @@ export function guardarTasaEuroEnCache(tasa, fechaActualizacion = new Date().toI
 }
 
 /**
+ * Consulta el proxy propio que lee directo de bcv.org.ve (valores exactos).
+ * Devuelve null si no está disponible o responde algo inválido, para usar el respaldo.
+ */
+async function consultarProxyBCV(signal) {
+  try {
+    const r = await fetch(BCV_PROXY_URL, { signal, headers: { Accept: 'application/json' } })
+    if (!r.ok) return null
+    const d = await r.json()
+    const usd = Number(d?.usd)
+    const eur = Number(d?.eur)
+    if (!(usd > 0) || !(eur > 0)) return null
+    return { usd, eur, fecha: d.fechaValor || new Date().toISOString() }
+  } catch {
+    return null
+  }
+}
+
+/**
  * Consulta la tasa oficial del Dólar BCV con fallback a la caché local.
  *
  * @param {{ forzar?: boolean, timeoutMs?: number }} [opciones]
@@ -132,6 +153,13 @@ export async function obtenerTasaBCV({ forzar = false, timeoutMs = 5000 } = {}) 
   const timer = setTimeout(() => controller.abort(), timeoutMs)
 
   try {
+    const directo = await consultarProxyBCV(controller.signal)
+    if (directo) {
+      const tasaProxy = Math.round(directo.usd * 100) / 100
+      guardarTasaEnCache(tasaProxy, directo.fecha)
+      return { tasa: tasaProxy, fechaActualizacion: directo.fecha, desdeCache: false }
+    }
+
     const respuesta = await fetch(DOLAR_API_URL, {
       signal: controller.signal,
       headers: { Accept: 'application/json' },
@@ -174,6 +202,18 @@ export async function obtenerTasaBCV({ forzar = false, timeoutMs = 5000 } = {}) 
 }
 
 /**
+ * La API (ve.dolarapi.com) entrega el euro oficial dividido entre 1000 (ej. 1.006 cuando el
+ * BCV publica 1.006,03 Bs.). Una tasa real en Bs. nunca es menor a 10, así que ese caso se
+ * detecta y se multiplica por 1000. Si la API se corrige, el valor correcto se usa tal cual.
+ */
+const UMBRAL_TASA_EUR_BS = 10
+const FACTOR_CORRECCION_EUR = 1000
+
+function esTasaEurEscalaIncorrecta(valor) {
+  return valor > 0 && valor < UMBRAL_TASA_EUR_BS
+}
+
+/**
  * Consulta la tasa oficial del Euro BCV con fallback a la caché local.
  *
  * @param {{ forzar?: boolean, timeoutMs?: number }} [opciones]
@@ -181,7 +221,8 @@ export async function obtenerTasaBCV({ forzar = false, timeoutMs = 5000 } = {}) 
  */
 export async function obtenerTasaEuroBCV({ forzar = false, timeoutMs = 5000 } = {}) {
   const cache = obtenerDetalleCacheBCV()
-  const tasaCache = cache?.tasaEUR
+  // Ignora valores de caché erróneos guardados con la escala incorrecta
+  const tasaCache = esTasaEurEscalaIncorrecta(cache?.tasaEUR) ? null : cache?.tasaEUR
   const fechaCache = cache?.fechaActualizacionEUR
 
   if (!forzar && tasaCache) {
@@ -196,6 +237,13 @@ export async function obtenerTasaEuroBCV({ forzar = false, timeoutMs = 5000 } = 
   const timer = setTimeout(() => controller.abort(), timeoutMs)
 
   try {
+    const directo = await consultarProxyBCV(controller.signal)
+    if (directo) {
+      const tasaProxy = Math.round(directo.eur * 100) / 100
+      guardarTasaEuroEnCache(tasaProxy, directo.fecha)
+      return { tasa: tasaProxy, fechaActualizacion: directo.fecha, desdeCache: false }
+    }
+
     const respuesta = await fetch(EURO_API_URL, {
       signal: controller.signal,
       headers: { Accept: 'application/json' },
@@ -212,7 +260,9 @@ export async function obtenerTasaEuroBCV({ forzar = false, timeoutMs = 5000 } = 
       throw new Error('Respuesta inválida de la API BCV Euro')
     }
 
-    const tasaFinal = Math.round(promedio * 100) / 100
+    const valorBs = esTasaEurEscalaIncorrecta(promedio) ? promedio * FACTOR_CORRECCION_EUR : promedio
+
+    const tasaFinal = Math.round(valorBs * 100) / 100
     const fechaActualizacion = data.fechaActualizacion || new Date().toISOString()
 
     guardarTasaEuroEnCache(tasaFinal, fechaActualizacion)
