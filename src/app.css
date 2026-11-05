@@ -1018,6 +1018,29 @@ form > button:first-of-type:active:not(:disabled) {
   font-size: 0.9rem;
 }
 
+.lista li.transaccion {
+  flex-wrap: nowrap;
+}
+
+.lista li.transaccion .descripcion {
+  flex: 1 0 auto;
+  white-space: nowrap;
+}
+
+.lista li.transaccion .monto-original,
+.lista li.transaccion .monto-usd,
+.lista li.transaccion .badge-categoria,
+.lista li.transaccion .acciones-fila {
+  flex: none;
+  white-space: nowrap;
+}
+
+@media (max-width: 560px) {
+  .lista li.transaccion {
+    flex-wrap: wrap;
+  }
+}
+
 .fecha {
   color: var(--texto-tenue);
   font-size: 0.8rem;
@@ -1305,12 +1328,35 @@ form > button:first-of-type:active:not(:disabled) {
   transform: translateY(0) scale(0.95);
 }
 
+/* Meta de ahorro en el inicio de Transacciones */
+.meta-inicio {
+  margin-top: 1.25rem;
+}
+
+@media (max-width: 539px) {
+  /* Deja espacio para los botones fijos sobre la barra inferior */
+  .meta-inicio {
+    padding-bottom: 5rem;
+  }
+}
+
 /* Botones de acciones en Transacciones */
 .contenedor-acciones-transacciones {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 0.85rem;
   margin: 1.25rem 0 1.5rem 0;
+}
+
+@media (max-width: 539px) {
+  .contenedor-acciones-transacciones {
+    position: fixed;
+    left: 0.75rem;
+    right: 0.75rem;
+    bottom: calc(var(--nav-height) + env(safe-area-inset-bottom) + 0.25rem);
+    margin: 0;
+    z-index: 15;
+  }
 }
 
 @media (min-width: 480px) {
@@ -1365,4 +1411,45 @@ form > button:first-of-type:active:not(:disabled) {
   padding: 0.15rem 0.55rem;
   border-radius: 999px;
   margin-left: 0.25rem;
+}
+
+/* Botón único de filtros en el historial */
+.barra-filtro {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+}
+
+.boton-filtro {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--bg);
+  box-shadow: var(--neu-elevated-sm);
+  border: none;
+  border-radius: 999px;
+  padding: 0.5rem 1rem;
+  min-height: 40px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--texto-tenue);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.boton-filtro.activo {
+  color: var(--acento);
+  box-shadow: var(--neu-inset-sm);
+}
+
+.boton-limpiar-filtros {
+  background: transparent;
+  border: none;
+  color: var(--texto-tenue);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
 }

@@ -10,6 +10,7 @@
   import TransactionBalance from './TransactionBalance.svelte'
   import TransactionForm from './TransactionForm.svelte'
   import TransactionList from './TransactionList.svelte'
+  import SavingsGoalCard from './SavingsGoalCard.svelte'
   import Icon from '../../shared/components/Icon.svelte'
 
   let todasTransacciones = $state([])
@@ -35,6 +36,7 @@
     todasTransacciones = await listarTransacciones({})
     categoriasDisponibles = obtenerCategoriasDisponibles(todasTransacciones)
     balance = await obtenerBalance({})
+
   }
 
   async function manejarGuardarRegistro(datos) {
@@ -93,16 +95,11 @@
 
 <TransactionBalance {balance} />
 
+<div class="meta-inicio">
+  <SavingsGoalCard />
+</div>
+
 <div class="contenedor-acciones-transacciones">
-  <button
-    type="button"
-    class="boton-accion-transacciones primario"
-    onclick={() => (mostrarModalRegistro = true)}
-    aria-haspopup="dialog"
-  >
-    <Icon name="plus" size={18} />
-    <span>Registrar Transacción</span>
-  </button>
   <button
     type="button"
     class="boton-accion-transacciones secundario"
@@ -110,8 +107,17 @@
     aria-haspopup="dialog"
   >
     <Icon name="transactions" size={18} />
-    <span>Historial de Transacciones</span>
+    <span>Historial</span>
     <span class="badge-contador">{todasTransacciones.length}</span>
+  </button>
+  <button
+    type="button"
+    class="boton-accion-transacciones primario"
+    onclick={() => (mostrarModalRegistro = true)}
+    aria-haspopup="dialog"
+  >
+    <Icon name="plus" size={18} />
+    <span>Registrar</span>
   </button>
 </div>
 

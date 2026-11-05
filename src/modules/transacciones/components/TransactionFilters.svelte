@@ -1,4 +1,5 @@
 <script>
+  import Icon from '../../shared/components/Icon.svelte'
   import Select from '../../shared/components/Select.svelte'
 
   let {
@@ -8,13 +9,41 @@
     filtroCategoria = $bindable(''),
   } = $props()
 
+  let abierto = $state(false)
+  let activos = $derived([filtroTipo, filtroMoneda, filtroCategoria].filter(Boolean).length)
+
+  function limpiar() {
+    filtroTipo = ''
+    filtroMoneda = ''
+    filtroCategoria = ''
+  }
+
   let opcionesCategorias = $derived([
     { value: '', label: 'Todas' },
     ...categoriasDisponibles.map((c) => ({ value: c, label: c })),
   ])
 </script>
 
-<div class="fila filtros">
+<div class="barra-filtro">
+  <button
+    type="button"
+    class="boton-filtro"
+    class:activo={abierto || activos > 0}
+    aria-expanded={abierto}
+    aria-controls="panel-filtros"
+    onclick={() => (abierto = !abierto)}
+  >
+    <Icon name="filter" size={16} />
+    <span>Filtros</span>
+    {#if activos > 0}<span class="badge-contador">{activos}</span>{/if}
+  </button>
+  {#if activos > 0}
+    <button type="button" class="boton-limpiar-filtros" onclick={limpiar}>Limpiar</button>
+  {/if}
+</div>
+
+{#if abierto}
+<div class="fila filtros" id="panel-filtros">
   <label>
     Tipo
     <div class="control-segmentado">
@@ -48,3 +77,4 @@
     <Select bind:value={filtroCategoria} options={opcionesCategorias} placeholder="Todas" />
   </label>
 </div>
+{/if}

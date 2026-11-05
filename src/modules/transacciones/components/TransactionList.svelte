@@ -34,21 +34,17 @@
   {:else}
     <ul class="lista">
       {#each transacciones as t (t.id)}
-        <li class:ingreso={t.tipo === 'ingreso'} class:gasto={t.tipo === 'gasto'}>
+        <li class="transaccion" class:ingreso={t.tipo === 'ingreso'} class:gasto={t.tipo === 'gasto'}>
           <span class="fecha">{t.fecha}</span>
           {#if t.categoria}
             <span class="badge-categoria">{t.categoria}</span>
           {/if}
           <span class="descripcion">{t.descripcion || (t.tipo === 'ingreso' ? 'Ingreso' : 'Gasto')}</span>
-          <span class="monto-original">
-            {#if t.moneda === 'VES'}
-              Bs. {t.monto.toFixed(2)} (tasa {t.tasaBCV})
-            {:else if t.tasaBCV}
-              ${t.monto.toFixed(2)} (≈ Bs. {(t.monto * t.tasaBCV).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})
-            {:else}
-              ${t.monto.toFixed(2)}
-            {/if}
-          </span>
+          {#if t.moneda === 'VES'}
+            <span class="monto-original">Bs. {t.monto.toFixed(2)} (tasa {t.tasaBCV})</span>
+          {:else if t.tasaBCV}
+            <span class="monto-original">≈ Bs. {(t.monto * t.tasaBCV).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+          {/if}
           <span class="monto-usd">{t.tipo === 'ingreso' ? '+' : '-'}${t.montoUSD.toFixed(2)}</span>
           <div class="acciones-fila">
             <button
