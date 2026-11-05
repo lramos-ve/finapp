@@ -8,6 +8,7 @@ export const TABLAS_RESPALDO = [
   'gastosFijos',
   'instanciasGastoFijo',
   'pagosGastoFijo',
+  'metas',
 ]
 
 /**

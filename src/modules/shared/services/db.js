@@ -43,3 +43,11 @@ db.version(2).stores({
   transacciones: '++id, tipo, moneda, fecha, categoria',
   gastosFijos: '++id, activo, categoria',
 })
+
+/**
+ * metas: (meta de ahorro definida por el usuario; hoy se usa un único registro)
+ *   { id, nombre, montoObjetivo (USD) }
+ */
+db.version(3).stores({
+  metas: '++id',
+})
